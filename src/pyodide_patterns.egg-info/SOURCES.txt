@@ -1,0 +1,10 @@
+README.md
+pyproject.toml
+setup.py
+src/pyodide_app/__init__.py
+src/pyodide_app/main.py
+src/pyodide_app/utils.py
+src/pyodide_patterns.egg-info/PKG-INFO
+src/pyodide_patterns.egg-info/SOURCES.txt
+src/pyodide_patterns.egg-info/dependency_links.txt
+src/pyodide_patterns.egg-info/top_level.txt

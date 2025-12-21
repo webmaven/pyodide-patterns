@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>pyodide.loadPackage() Test</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+</head>
+
+<body>
+    <h1>pyodide.loadPackage() Test</h1>
+    <p id="status">Loading Pyodide...</p>
+    <script>
+        const status = document.getElementById('status');
+
+        async function main() {
+            // Always assign to window.pyodide
+            window.pyodide = await loadPyodide();
+            status.textContent = 'Pyodide loaded. Ready.';
+        }
+
+        async function loadPkg(pkgName) {
+            try {
+                status.textContent = `Loading '${pkgName}'...`;
+                // Always access from window.pyodide
+                await window.pyodide.loadPackage(pkgName);
+                status.textContent = `'${pkgName}' loaded successfully.`;
+                return true;
+            } catch (e) {
+                console.error("loadPackage error:", e);
+                status.textContent = `Failed to load '${pkgName}': ${e.message}`;
+                return false;
+            }
+        }
+
+        main();
+    </script>
+</body>
+
+</html>

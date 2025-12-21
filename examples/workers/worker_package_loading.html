@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Advanced Worker Package Loading</title>
+</head>
+
+<body>
+    <h1>Advanced Worker Package Loading Test</h1>
+    <p id="status">Main page loaded. Starting worker...</p>
+
+    <script>
+        const status = document.getElementById('status');
+        const worker = new Worker('../js/package_loading_worker.js');
+
+        // This function will be called by our Playwright tests
+        function installPackageInWorker(pkgName) {
+            worker.postMessage({ pkgName: pkgName });
+        }
+
+        worker.onmessage = (event) => {
+            const { type, message, pkgName } = event.data;
+            console.log("Main thread received from worker:", event.data);
+
+            // We'll use a specific element to signal final success for the test
+            if (type === "success") {
+                const successEl = document.createElement('div');
+                successEl.id = `success-${pkgName}`;
+                successEl.textContent = `Successfully installed ${pkgName}`;
+                document.body.appendChild(successEl);
+            } else {
+                // For status and error messages, update the main status element
+                status.textContent = message;
+            }
+        };
+
+        worker.onerror = (event) => {
+            console.error("Main thread caught worker error:", event);
+            status.textContent = `A critical worker error occurred: ${event.message}`;
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Micropip Install Failure</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+</head>
+
+<body>
+    <h1>Micropip Install Failure Test</h1>
+    <p>Loading Pyodide and attempting to install a non-existent package...</p>
+    <script>
+        async function main() {
+            let pyodide = await loadPyodide();
+            window.pyodide = pyodide;
+            console.log("Pyodide loaded. Loading micropip...");
+            await pyodide.loadPackage("micropip");
+            const micropip = pyodide.pyimport("micropip");
+            console.log("Micropip loaded. Attempting to install non-existent package...");
+
+            try {
+                await micropip.install('a-package-that-does-not-exist-and-never-will');
+                document.querySelector('p').textContent = 'This should not appear!';
+            } catch (e) {
+                console.error("Caught a Python error:", e.message);
+                document.querySelector('p').textContent = 'Micropip failed to install, as expected.';
+            }
+        }
+        main();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Python Runtime Error</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+</head>
+
+<body>
+    <h1>Python Runtime Error Test</h1>
+    <p>Loading Pyodide and running a script that will fail...</p>
+    <script>
+        async function main() {
+            let pyodide = await loadPyodide();
+            window.pyodide = pyodide;
+            console.log("Pyodide loaded. Running Python script with an error...");
+
+            try {
+                await pyodide.runPythonAsync(`
+                    print("About to cause a ZeroDivisionError...")
+                    x = 1 / 0
+                `);
+                document.querySelector('p').textContent = 'This should not appear!';
+            } catch (e) {
+                console.error("Caught a Python error:", e.message);
+                document.querySelector('p').textContent = 'Python script failed, as expected.';
+            }
+        }
+        main();
+    </script>
+</body>
+
+</html>

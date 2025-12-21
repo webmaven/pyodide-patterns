@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Pyodide Web Worker Error Test</title>
+</head>
+
+<body>
+    <h1>Pyodide in a Web Worker - Error Scenario</h1>
+    <p id="status">Loading...</p>
+    <script>
+        const status = document.getElementById('status');
+        const worker = new Worker('../js/pyodide_worker_error.js');
+
+        worker.onmessage = (event) => {
+            console.log("Message from worker:", event.data);
+            status.textContent = event.data.message;
+        };
+
+        worker.onerror = (event) => {
+            console.error("Error in worker:", event);
+            status.textContent = `Worker error: ${event.message}`;
+        };
+    </script>
+</body>
+
+</html>

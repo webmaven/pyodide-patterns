@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Pyodide Load Error</title>
+    <!-- This URL is intentionally incorrect to trigger a load failure -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/a_file_that_does_not_exist.js"></script>
+</head>
+
+<body>
+    <h1>Pyodide Load Error Test</h1>
+    <p>Attempting to load Pyodide from a bad URL...</p>
+    <script>
+        async function main() {
+            try {
+                console.log("Attempting to load Pyodide...");
+                await loadPyodide();
+                document.querySelector('p').textContent = 'This should not appear!';
+            } catch (e) {
+                console.error("Caught an error:", e);
+                document.querySelector('p').textContent = 'Pyodide failed to load, as expected.';
+            }
+        }
+        main();
+    </script>
+</body>
+
+</html>

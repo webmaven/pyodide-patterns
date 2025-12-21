@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+</head>
+
+<body>
+  <h1 id="title">Hello, Pyodide!</h1>
+  <input type="text" id="name" placeholder="Enter your name" />
+  <button id="greet-button">Greet</button>
+  <button id="benchmark-button">Benchmark</button>
+
+  <script type="text/javascript">
+    async function main() {
+      // Dynamically get the pyodide version from the script tag
+      const pyodideScript = document.querySelector('script[src*="pyodide.js"]');
+      const pyodideVersion = pyodideScript.src.match(/v([0-9.]+)/)[1];
+
+      let pyodide = await loadPyodide({
+        indexURL: `https://cdn.jsdelivr.net/pyodide/v${pyodideVersion}/full/`,
+      });
+      window.pyodide = pyodide;
+      console.log("Pyodide attached to window:", window.pyodide);
+
+      // Install the pyodide_app package
+      await pyodide.loadPackage("micropip");
+      const micropip = pyodide.pyimport("micropip");
+      await micropip.install("/dist/pyodide_patterns-0.1.0-py3-none-any.whl");
+
+      // Import and run the main function
+      pyodide.runPython(`
+          from pyodide_app.main import run, greet, benchmark_add
+          run()
+
+          # Expose a Python function to JavaScript
+          from js import document
+
+          def greet_js_proxy(name):
+              greet(name)
+
+          def benchmark_js_proxy():
+              benchmark_add()
+        `);
+
+      // Get the Python functions
+      const greet_from_python = pyodide.globals.get('greet_js_proxy');
+      const benchmark_from_python = pyodide.globals.get('benchmark_js_proxy');
+
+      // Set up the event listeners
+      document.getElementById("greet-button").onclick = () => {
+        let name = document.getElementById("name").value;
+        greet_from_python(name);
+      };
+
+      document.getElementById("benchmark-button").onclick = () => {
+        benchmark_from_python();
+      };
+    }
+    main();
+  </script>
+</body>
+
+</html>

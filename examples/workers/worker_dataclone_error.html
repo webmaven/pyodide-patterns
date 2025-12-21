@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>DataCloneError Test</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
+</head>
+
+<body>
+    <h1>DataCloneError Test</h1>
+    <p id="status">Loading Pyodide on main thread...</p>
+    <script>
+        const status = document.getElementById('status');
+        // A very simple worker that does nothing but receive messages.
+        const worker = new Worker('../js/simple_worker.js');
+
+        async function main() {
+            const pyodide = await loadPyodide();
+            status.textContent = 'Pyodide loaded. Creating Python object...';
+
+            // Create a simple Python object (a dictionary).
+            // This returns a PyProxy to the JavaScript side.
+            const pyProxy = pyodide.runPython("({'a': 1})");
+
+            status.textContent = 'Attempting to post PyProxy to worker...';
+            try {
+                // This is the line that will throw the DataCloneError.
+                worker.postMessage(pyProxy);
+                status.textContent = 'This should not appear!';
+            } catch (e) {
+                console.error("Caught expected error:", e);
+                status.textContent = `Caught expected error: ${e.name}`;
+            }
+        }
+
+        main();
+    </script>
+</body>
+
+</html>

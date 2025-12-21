@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Playwright Console Debugging</title>
+</head>
+<body>
+  <h1>Welcome</h1>
+  <div id="container"></div>
+
+  <script>
+    const container = document.getElementById('container');
+
+    console.log("Starting script...");
+
+    // Simulate a multi-step process
+    setTimeout(() => {
+      console.log("Step 1: Process initiated.");
+      const step1 = document.createElement('p');
+      step1.textContent = "Step 1 Complete";
+      container.appendChild(step1);
+    }, 100);
+
+    setTimeout(() => {
+      console.log("Step 2: An error occurs.");
+      // Oh no! Something went wrong. We'll log the error,
+      // but we won't create the "final-result" element.
+      console.error("ERROR: Failed to retrieve data from server.");
+    }, 200);
+
+    setTimeout(() => {
+      console.log("Step 3: Attempting to render final result.");
+      // This step would normally render the result, but since step 2
+      // failed, we won't have the data to do so. The 'final-result'
+      // element will never be created.
+    }, 300);
+  </script>
+</body>
+</html>

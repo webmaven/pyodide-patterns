@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>micropip.install() Test</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+</head>
+
+<body>
+    <h1>micropip.install() Test</h1>
+    <p id="status">Loading Pyodide...</p>
+    <script>
+        const status = document.getElementById('status');
+        let micropip;
+
+        async function main() {
+            window.pyodide = await loadPyodide();
+            status.textContent = 'Loading micropip...';
+            await window.pyodide.loadPackage('micropip');
+            micropip = window.pyodide.pyimport('micropip');
+            status.textContent = 'Pyodide and micropip loaded. Ready.';
+        }
+
+        async function installPkg(pkgName) {
+            try {
+                status.textContent = `Installing '${pkgName}'...`;
+                await micropip.install(pkgName);
+                status.textContent = `'${pkgName}' installed successfully.`;
+                return true;
+            } catch (e) {
+                console.error("micropip.install error:", e);
+                status.textContent = `Failed to install '${pkgName}': ${e.message}`;
+                return false;
+            }
+        }
+
+        main();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Async Race Condition Test</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+</head>
+
+<body>
+    <h1>Async Race Condition Test</h1>
+    <button id="start-button">Start Slow Process</button>
+    <div id="result-container"></div>
+    <script>
+        const startButton = document.getElementById('start-button');
+        const resultContainer = document.getElementById('result-container');
+        let pyodide;
+
+        async function initPyodide() {
+            resultContainer.textContent = 'Loading Pyodide...';
+            pyodide = await loadPyodide();
+            resultContainer.textContent = 'Pyodide loaded. Ready to start.';
+        }
+
+        startButton.onclick = async () => {
+            resultContainer.textContent = 'Running slow Python process...';
+            await pyodide.runPythonAsync(`
+                import time
+                time.sleep(2)
+            `);
+            const p = document.createElement('p');
+            p.id = 'success-message';
+            p.textContent = 'Slow process complete!';
+            resultContainer.appendChild(p);
+        };
+
+        initPyodide();
+    </script>
+</body>
+
+</html>

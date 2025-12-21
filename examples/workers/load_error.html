@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Worker Load Error Test</title>
+</head>
+<body>
+    <h1>Worker Load Error Test</h1>
+    <p id="status">Loading...</p>
+    <script>
+        const status = document.getElementById('status');
+        // This worker script does not exist, which will cause a 404.
+        const worker = new Worker('js/a_worker_that_does_not_exist.js');
+
+        worker.onmessage = (event) => {
+            status.textContent = "This should not appear!";
+        };
+
+        // We can't easily catch the 404 in the main thread's onerror,
+        // so we will rely on network inspection in the test.
+        // However, a console error will be logged by the browser.
+    </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>loadPackagesFromImports() Test</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+</head>
+
+<body>
+    <h1>loadPackagesFromImports() Test</h1>
+    <p id="status">Loading Pyodide...</p>
+    <script>
+        const status = document.getElementById('status');
+
+        async function main() {
+            window.pyodide = await loadPyodide();
+            status.textContent = 'Pyodide loaded. Ready.';
+        }
+
+        async function loadFromImports(code) {
+            try {
+                status.textContent = `Running loadPackagesFromImports...`;
+                await window.pyodide.loadPackagesFromImports(code);
+                status.textContent = `loadPackagesFromImports successful.`;
+                // Also run the code to ensure it works
+                await window.pyodide.runPythonAsync(code);
+                return true;
+            } catch (e) {
+                console.error("loadPackagesFromImports error:", e);
+                status.textContent = `loadPackagesFromImports failed: ${e.message}`;
+                return false;
+            }
+        }
+
+        main();
+    </script>
+</body>
+
+</html>
