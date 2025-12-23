@@ -1,9 +1,9 @@
 # Incorrect text assertion test
 
-import os
 
 import pytest
 from playwright.sync_api import Page, expect
+
 
 @pytest.mark.xfail(reason="Demonstrating incorrect text assertion failure")
 def test_incorrect_text_assertion(page: Page, live_server: str):

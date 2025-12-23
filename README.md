@@ -40,6 +40,7 @@ pyodide-patterns/
 2.  Install dependencies and run tests using Hatch:
 
 ```bash
+hatch build
 hatch run test
 ```
 

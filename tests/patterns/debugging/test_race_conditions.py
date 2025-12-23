@@ -1,6 +1,7 @@
 # This file will contain tests for asynchronous race conditions.
-from playwright.sync_api import Page, expect
 import pytest
+from playwright.sync_api import Page, expect
+
 
 @pytest.mark.xfail(strict=True, reason="This test is designed to fail to demonstrate a race condition.")
 def test_async_race_condition_failure(page: Page, live_server: str):

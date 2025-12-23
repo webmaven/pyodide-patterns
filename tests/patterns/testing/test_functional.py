@@ -1,5 +1,5 @@
-import pytest
 from playwright.sync_api import Page, expect
+
 
 def test_greet_button_playwright(page: Page, http_server):
     """

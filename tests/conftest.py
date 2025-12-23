@@ -1,12 +1,13 @@
-import pytest
-import sys
-import re
-import threading
 import http.server
-import socketserver
 import os
+import re
+import socketserver
+import sys
+import threading
 from functools import partial
 from pathlib import Path
+
+import pytest
 from pyodide_version_mapping import PYODIDE_TO_PYTHON_VERSIONS
 
 # Add src directory to sys.path to allow importing pyodide_app
@@ -76,10 +77,10 @@ def live_server(pyodide_version):
     # Read and modify the index.html content in memory
     pattern = re.compile(r"https://cdn.jsdelivr.net/pyodide/v[^/]+/full/pyodide.js")
     new_url = f"https://cdn.jsdelivr.net/pyodide/v{pyodide_version}/full/pyodide.js"
-    
+
     if not original_index_html_path.exists():
         pytest.fail(f"index.html not found at {original_index_html_path}")
-        
+
     original_content = original_index_html_path.read_text(encoding="utf-8")
     if not pattern.search(original_content):
         print(f"WARNING: Could not find Pyodide CDN URL in {original_index_html_path} to replace.")

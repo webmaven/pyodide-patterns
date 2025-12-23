@@ -1,6 +1,9 @@
-from js import document
 import timeit
+
+from js import document
+
 from . import utils
+
 
 def change_heading_text(new_text):
     """Changes the text of the H1 element with id 'title'."""

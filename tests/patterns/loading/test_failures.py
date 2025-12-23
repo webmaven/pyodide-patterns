@@ -1,5 +1,6 @@
 from playwright.sync_api import Page, expect
 
+
 def test_pyodide_loads_successfully(page: Page, live_server: str):
     """
     The 'happy path' test for loading Pyodide.

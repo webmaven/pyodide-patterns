@@ -1,6 +1,6 @@
 # This file will contain tests for advanced Pyodide and Web Worker scenarios.
 from playwright.sync_api import Page, expect
-import pytest
+
 
 def wait_for_worker_ready(page: Page, timeout=60000):
     """Waits for the worker to initialize Pyodide and micropip."""
@@ -36,7 +36,7 @@ def test_micropip_in_worker_package_not_found(page: Page, live_server: str):
     # Assert that the specific Python error is displayed on the page
     status_element = page.locator("#status")
     expect(status_element).to_contain_text(
-        "ValueError: Unsupported content type: text/plain",
+            "Can't fetch metadata for 'a-package-that-will-never-exist'",
         timeout=30000
     )
 

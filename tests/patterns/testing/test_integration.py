@@ -1,12 +1,12 @@
 import sys
 from unittest.mock import MagicMock, patch
-import pytest
 
 # Mock the 'js' module *before* importing 'main'
 sys.modules['js'] = MagicMock()
 
 from pyodide_app.main import run
 from pyodide_app.utils import format_greeting
+
 
 @patch('pyodide_app.main.document')
 def test_run_integration(mock_document):
