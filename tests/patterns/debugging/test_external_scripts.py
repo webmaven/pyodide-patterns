@@ -1,8 +1,8 @@
 # External script loading failure tests
 
-import os
 import pytest
-from playwright.sync_api import Page, expect, Error
+from playwright.sync_api import Page, expect
+
 
 def test_external_script_success(page: Page, live_server: str):
     """Load a page that includes a valid external script and verify it runs without error."""

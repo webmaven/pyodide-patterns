@@ -1,8 +1,7 @@
 # HTTP server scenario tests
 
-import os
-import pytest
-from playwright.sync_api import Page, expect, Error
+from playwright.sync_api import Page, expect
+
 
 def test_http_page_has_correct_title(page: Page, live_server: str):
     """Navigate to the index page served over HTTP and verify the title."""

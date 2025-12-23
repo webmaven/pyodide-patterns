@@ -1,8 +1,8 @@
 # File not found / 404 handling test
 
-import os
 import pytest
-from playwright.sync_api import Page, expect, Error
+from playwright.sync_api import Error, Page
+
 
 @pytest.mark.xfail(reason="Demonstrating file not found error handling")
 def test_handles_file_not_found_error(page: Page, live_server: str):

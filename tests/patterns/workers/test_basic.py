@@ -1,6 +1,7 @@
 # This file will contain tests for Pyodide running in a Web Worker.
+
 from playwright.sync_api import Page, expect
-import threading
+
 
 def test_pyodide_in_worker_happy_path(page: Page, live_server: str):
     """

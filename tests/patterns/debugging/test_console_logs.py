@@ -1,8 +1,8 @@
 # Console log capture on failure
 
-import os
 import pytest
-from playwright.sync_api import Page, expect, Error
+from playwright.sync_api import Page, expect
+
 
 @pytest.mark.xfail(reason="Demonstrating console log capture on failure")
 def test_captures_console_logs_on_failure(page: Page, live_server: str):

@@ -1,6 +1,7 @@
-import pytest
-from playwright.sync_api import Page, expect
 import time
+
+from playwright.sync_api import Page, expect
+
 
 def test_benchmark_button(page: Page, http_server):
     """

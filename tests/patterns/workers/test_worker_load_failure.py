@@ -1,5 +1,6 @@
-from playwright.sync_api import Page, expect
 import pytest
+from playwright.sync_api import Page, expect
+
 
 def wait_for_pyodide(page: Page, timeout=30000):
     """Wait until Pyodide reports it is loaded and ready."""
