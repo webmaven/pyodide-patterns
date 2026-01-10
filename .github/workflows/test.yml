@@ -1,0 +1,46 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install hatch build
+        hatch env create
+
+    - name: Install Playwright browsers
+      run: |
+        hatch run python -m playwright install --with-deps chromium
+
+    - name: Build Test Artifacts
+      run: |
+        # Build the main application package
+        python -m build
+        # Build the local helper package required for tests
+        python -m build _my_local_package
+
+    - name: Run Tests
+      # Increase timeout to account for slower CI environments
+      run: hatch run test
+
+    - name: Run Linting
+      run: hatch run lint
