@@ -35,3 +35,6 @@ target-version = "py38"
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "A", "C4", "T10", "N", "S"]
 ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]

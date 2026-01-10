@@ -9,7 +9,6 @@ sys.modules["js"] = MagicMock()
 from pyodide_app.main import add, change_heading_text  # noqa: E402
 
 
-
 def test_add():
     """Tests the pure logic 'add' function."""
     assert add(2, 3) == 5
