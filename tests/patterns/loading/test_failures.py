@@ -51,7 +51,9 @@ def test_pyodide_fails_to_load(page: Page, live_server: str):
             failed_script_request = req
             break
 
-    assert failed_script_request is not None, "Did not find the failed request for the Pyodide script."
+    assert failed_script_request is not None, (
+        "Did not find the failed request for the Pyodide script."
+    )
 
     # Check that the pyodide object is NOT on the window
     pyodide_on_window = page.evaluate("!!window.pyodide")
@@ -72,8 +74,7 @@ def test_micropip_fails_to_install_package(page: Page, live_server: str):
 
     # Wait for the page to indicate that the install failed.
     expect(page.locator("p")).to_have_text(
-        "Micropip failed to install, as expected.",
-        timeout=30000
+        "Micropip failed to install, as expected.", timeout=30000
     )
 
     # Check the console for the specific Python error message
@@ -95,8 +96,7 @@ def test_python_runtime_error(page: Page, live_server: str):
 
     # Wait for the page to indicate that the script failed.
     expect(page.locator("p")).to_have_text(
-        "Python script failed, as expected.",
-        timeout=30000
+        "Python script failed, as expected.", timeout=30000
     )
 
     # Check the console for the specific Python error message

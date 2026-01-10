@@ -17,10 +17,8 @@ def test_pyodide_in_worker_happy_path(page: Page, live_server: str):
     status_element = page.locator("#status")
 
     # Wait for the success message, allowing a long timeout for Pyodide to load.
-    expect(status_element).to_contain_text(
-        "Python script successful!",
-        timeout=60000
-    )
+    expect(status_element).to_contain_text("Python script successful!", timeout=60000)
+
 
 def test_python_error_in_worker(page: Page, live_server: str):
     """
@@ -35,14 +33,12 @@ def test_python_error_in_worker(page: Page, live_server: str):
     status_element = page.locator("#status")
 
     # Wait for the error message to be displayed.
-    expect(status_element).to_contain_text(
-        "Worker caught Python error",
-        timeout=60000
-    )
+    expect(status_element).to_contain_text("Worker caught Python error", timeout=60000)
     expect(status_element).to_contain_text(
         "ZeroDivisionError: division by zero",
-        timeout=1000  # Should be quick after the first check
+        timeout=1000,  # Should be quick after the first check
     )
+
 
 # def test_worker_script_fails_to_load(page: Page, live_server: str):
 #     """
@@ -55,7 +51,8 @@ def test_python_error_in_worker(page: Page, live_server: str):
 #     has proven to be unreliable.
 #
 #     Approaches tried and failed:
-#     1. `page.on("requestfailed")`: Does not fire for the worker's initial script request.
+#     1. `page.on("requestfailed")`: Does not fire for the worker's
+#        initial script request.
 #     2. `page.expect_console_message()`: The browser does not consistently log a
 #        console message for this failure that can be reliably caught by the test.
 #     3. `worker.on("error")`: The `worker` object is never created, so no error
@@ -70,7 +67,10 @@ def test_python_error_in_worker(page: Page, live_server: str):
 #     failed_response = None
 #
 #     def on_response(response):
-#         if "a_worker_that_does_not_exist.js" in response.url and response.status == 404:
+#         if (
+#             "a_worker_that_does_not_exist.js" in response.url
+#             and response.status == 404
+#         ):
 #             failed_response = response
 #             response_event.set()
 #

@@ -17,25 +17,21 @@ dependencies = [
   "pytest-playwright",
   "pytest-asyncio",
   "ruff",
-  "black",
 ]
 
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
 test-debug = "pytest --headed --slowmo 1000 {args:tests}"
-lint = [
-  "ruff check --fix {args:src/pyodide_app tests}",
-  "black {args:src/pyodide_app tests}",
-]
-
-[tool.ruff]
-line-length = 88
-
-[tool.ruff.lint]
-select = ["E", "F", "W", "I", "UP", "B", "A", "C4", "T10", "N", "S"]
-
-[tool.black]
-line-length = 88
+lint = "ruff check {args:.}"
+format = "ruff format {args:.}"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pyodide_app"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "A", "C4", "T10", "N", "S"]
+ignore = []

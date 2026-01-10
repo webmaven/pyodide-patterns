@@ -34,4 +34,6 @@ def test_greeting_e2e_playwright(page: Page, http_server):
     expect(title).to_have_text("Hello, World!")
 
     # 4. Take a screenshot
-    page.screenshot(path="pyodide-patterns/tests/screenshots/e2e_playwright_screenshot.png")
+    page.screenshot(
+        path="pyodide-patterns/tests/screenshots/e2e_playwright_screenshot.png"
+    )

@@ -15,7 +15,7 @@ def test_greet_button_playwright(page: Page, http_server):
 
     # It might take a moment for Pyodide to load and run the initial script.
     # We should wait for the initial text to be set.
-    expect(title).to_have_text("Hello, World!", timeout=30000) # Increased timeout
+    expect(title).to_have_text("Hello, World!", timeout=30000)  # Increased timeout
 
     # Interact with the page
     name_input.fill("Jules")

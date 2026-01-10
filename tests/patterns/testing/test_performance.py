@@ -23,7 +23,7 @@ def test_benchmark_button(page: Page, http_server):
     # Wait for the benchmark result to be printed to the console
     # We're looking for a message that starts with "Execution time"
     # We'll need to poll the logs for a bit.
-    timeout = time.time() + 10 # 10 second timeout
+    timeout = time.time() + 10  # 10 second timeout
     benchmark_result = None
     while time.time() < timeout:
         for log in logs:

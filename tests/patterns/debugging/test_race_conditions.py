@@ -3,7 +3,9 @@ import pytest
 from playwright.sync_api import Page, expect
 
 
-@pytest.mark.xfail(strict=True, reason="This test is designed to fail to demonstrate a race condition.")
+@pytest.mark.xfail(
+    strict=True, reason="This test is designed to fail to demonstrate a race condition."
+)
 def test_async_race_condition_failure(page: Page, live_server: str):
     """
     This test demonstrates a common race condition failure.
@@ -18,8 +20,7 @@ def test_async_race_condition_failure(page: Page, live_server: str):
 
     # Wait for Pyodide to be ready before starting the test
     expect(page.locator("#result-container")).to_have_text(
-        "Pyodide loaded. Ready to start.",
-        timeout=60000
+        "Pyodide loaded. Ready to start.", timeout=60000
     )
 
     # Click the button to start the slow process
@@ -48,8 +49,7 @@ def test_async_race_condition_success(page: Page, live_server: str):
 
     # Wait for Pyodide to be ready
     expect(page.locator("#result-container")).to_have_text(
-        "Pyodide loaded. Ready to start.",
-        timeout=60000
+        "Pyodide loaded. Ready to start.", timeout=60000
     )
 
     # Click the button to start the slow process

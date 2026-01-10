@@ -2,13 +2,13 @@ import sys
 from unittest.mock import MagicMock, patch
 
 # Mock the 'js' module *before* importing 'main'
-sys.modules['js'] = MagicMock()
+sys.modules["js"] = MagicMock()
 
-from pyodide_app.main import run
-from pyodide_app.utils import format_greeting
+from pyodide_app.main import run  # noqa: E402
+from pyodide_app.utils import format_greeting  # noqa: E402
 
 
-@patch('pyodide_app.main.document')
+@patch("pyodide_app.main.document")
 def test_run_integration(mock_document):
     """
     An integration test to verify that 'main.run' correctly uses 'utils.format_greeting'
@@ -19,7 +19,7 @@ def test_run_integration(mock_document):
 
     # Patch the 'format_greeting' function in the 'utils' module used by 'main'
     # This verifies the interaction between main and utils
-    with patch('pyodide_app.main.utils.format_greeting', format_greeting):
+    with patch("pyodide_app.main.utils.format_greeting", format_greeting):
         run()
 
     mock_document.getElementById.assert_called_once_with("title")
