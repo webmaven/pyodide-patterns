@@ -41,6 +41,7 @@ pyodide-patterns/
 
 ```bash
 hatch build
+cd _my_local_package && hatch build && cd ..
 hatch run test
 ```
 
@@ -76,4 +77,4 @@ pytest
 
 ## Contributing
 
-Contributions are welcome! If you have a new pattern or recipe, please submit a pull request.
+Contributions are welcome! If you have a new pattern or recipe, please see our [contributing guide](CONTRIBUTING.md) for more details.
