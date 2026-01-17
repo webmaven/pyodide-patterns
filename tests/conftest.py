@@ -5,6 +5,8 @@ import socketserver
 import sys
 import threading
 from functools import partial
+
+import nest_asyncio
 from pathlib import Path
 
 import pytest
@@ -39,6 +41,7 @@ def pytest_configure(config):
     Validate that the local Python version matches the required version
     for the selected Pyodide version.
     """
+    nest_asyncio.apply()
     pyodide_version = config.getoption("--pyodide-version")
     if pyodide_version not in PYODIDE_TO_PYTHON_VERSIONS:
         pytest.exit(f"Unknown Pyodide version: {pyodide_version}", returncode=1)

@@ -58,6 +58,7 @@ pytest
 ### 1. Testing Patterns
 *   **End-to-End Testing**: How to test full user flows in the browser.
 *   **Functional Testing**: How to verify specific features.
+*   **Test Suite Isolation**: How to resolve event loop conflicts between `pytest-asyncio` and `pytest-playwright` (inspired by the Imposition project).
 
 ### 2. Debugging Patterns
 *   **Race Conditions**: How to identify and fix async race conditions in tests.
