@@ -6,7 +6,7 @@ import sys
 import threading
 from functools import partial
 from pathlib import Path
-from typing import Generator
+from typing import Generator, cast
 
 import nest_asyncio
 import pytest
@@ -125,7 +125,7 @@ def live_server(pyodide_version: str) -> Generator[str, None, None]:
                 super().do_GET()
 
     with socketserver.TCPServer(("localhost", 0), PyodideHandler) as httpd:
-        host, port = httpd.server_address
+        host, port = cast(tuple[str, int], httpd.server_address)
         base_url = f"http://{host}:{port}"
         server_thread = threading.Thread(target=httpd.serve_forever)
         server_thread.daemon = True
@@ -142,7 +142,7 @@ def cross_origin_server() -> Generator[str, None, None]:
     web_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     handler = partial(NoCorsHandler, directory=web_root)
     with socketserver.TCPServer(("localhost", 0), handler) as httpd:
-        host, port = httpd.server_address
+        host, port = cast(tuple[str, int], httpd.server_address)
         base_url = f"http://{host}:{port}"
         server_thread = threading.Thread(target=httpd.serve_forever)
         server_thread.daemon = True
