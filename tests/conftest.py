@@ -6,6 +6,7 @@ import sys
 import threading
 from functools import partial
 from pathlib import Path
+from typing import Generator
 
 import nest_asyncio
 import pytest
@@ -19,7 +20,7 @@ if src_path not in sys.path:
 # Existing Pyodide version fixtures
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser: pytest.Parser) -> None:
     """Add a command line option to specify the Pyodide version."""
     parser.addoption(
         "--pyodide-version",
@@ -30,12 +31,12 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture(scope="session")
-def pyodide_version(request):
+def pyodide_version(request: pytest.FixtureRequest) -> str:
     """Return the Pyodide version specified on the command line."""
     return request.config.getoption("--pyodide-version")
 
 
-def pytest_configure(config):
+def pytest_configure(config: pytest.Config) -> None:
     """
     Validate that the local Python version matches the required version
     for the selected Pyodide version.
@@ -82,7 +83,7 @@ class NoCorsHandler(http.server.SimpleHTTPRequestHandler):
 
 
 @pytest.fixture(scope="session")
-def live_server(pyodide_version):
+def live_server(pyodide_version: str) -> Generator[str, None, None]:
     """
     A robust, threaded HTTP server that serves the pyodide-patterns directory.
     It dynamically injects the correct Pyodide version into index.html by
@@ -135,7 +136,7 @@ def live_server(pyodide_version):
 
 
 @pytest.fixture(scope="session")
-def cross_origin_server():
+def cross_origin_server() -> Generator[str, None, None]:
     """Start a second HTTP server **without** CORS headers.
     Used to test CORS‑related failure scenarios."""
     web_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -152,6 +153,6 @@ def cross_origin_server():
 
 
 @pytest.fixture(scope="session")
-def http_server(live_server):
+def http_server(live_server: str) -> str:
     """Alias for live_server to support ported tests."""
     return live_server

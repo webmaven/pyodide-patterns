@@ -27,6 +27,7 @@ test-debug = "pytest --headed --slowmo 1000 {args:tests}"
 lint = "ruff check {args:.}"
 format = "ruff format {args:.}"
 type-check = "mypy {args:.}"
+test-isolated = "pytest tests/patterns/testing/integration"
 
 [tool.mypy]
 explicit_package_bases = true

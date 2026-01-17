@@ -5,18 +5,18 @@ from js import document
 from . import utils
 
 
-def change_heading_text(new_text):
+def change_heading_text(new_text: str) -> None:
     """Changes the text of the H1 element with id 'title'."""
     title_element = document.getElementById("title")
     title_element.innerText = new_text
 
 
-def add(a, b):
+def add(a: int, b: int) -> int:
     """A pure logic function that adds two numbers."""
     return a + b
 
 
-def greet(name):
+def greet(name: str) -> None:
     """Greets the user with the given name."""
     if not name:
         name = "World"
@@ -24,13 +24,13 @@ def greet(name):
     change_heading_text(greeting)
 
 
-def run():
+def run() -> None:
     """This function is called from the HTML file."""
     # Set an initial greeting
     greet("")
 
 
-def benchmark_add():
+def benchmark_add() -> None:
     """Benchmarks the 'add' function and prints the result to the console."""
     execution_time = timeit.timeit("add(2, 3)", globals=globals(), number=100000)
     print(

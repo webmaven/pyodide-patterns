@@ -42,5 +42,11 @@ jobs:
       # Increase timeout to account for slower CI environments
       run: hatch run test
 
+    - name: Run Isolated Tests
+      run: hatch run test-isolated
+
+    - name: Run Type-Checking
+      run: hatch run type-check
+
     - name: Run Linting
       run: hatch run lint
