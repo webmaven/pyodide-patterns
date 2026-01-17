@@ -13,4 +13,5 @@ def test_http_file_not_found(page: Page, live_server: str):
     """Request a non‑existent file over HTTP and assert the correct response status."""
     missing_url = f"{live_server}/non_existent.html"
     response = page.goto(missing_url)
+    assert response is not None
     assert response.status == 404

@@ -18,6 +18,7 @@ dependencies = [
   "pytest-asyncio",
   "nest-asyncio",
   "ruff",
+  "mypy",
 ]
 
 [tool.hatch.envs.default.scripts]
@@ -25,6 +26,12 @@ test = "pytest {args:tests}"
 test-debug = "pytest --headed --slowmo 1000 {args:tests}"
 lint = "ruff check {args:.}"
 format = "ruff format {args:.}"
+type-check = "mypy {args:.}"
+
+[tool.mypy]
+explicit_package_bases = true
+namespace_packages = true
+ignore_missing_imports = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pyodide_app"]

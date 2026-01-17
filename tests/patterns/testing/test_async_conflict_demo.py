@@ -1,8 +1,12 @@
-import pytest
 import asyncio
 
+import pytest
+
+
 @pytest.mark.asyncio
-@pytest.mark.xfail(reason="Event loop conflict between pytest-asyncio and pytest-playwright")
+@pytest.mark.xfail(
+    reason="Event loop conflict between pytest-asyncio and pytest-playwright"
+)
 async def test_async_conflict_demo():
     """
     This test demonstrates the conflict between pytest-asyncio and pytest-playwright.

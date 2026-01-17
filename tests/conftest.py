@@ -5,10 +5,9 @@ import socketserver
 import sys
 import threading
 from functools import partial
-
-import nest_asyncio
 from pathlib import Path
 
+import nest_asyncio
 import pytest
 from pyodide_version_mapping import PYODIDE_TO_PYTHON_VERSIONS
 

@@ -1,12 +1,13 @@
-import pytest
-from unittest.mock import MagicMock, patch
 import asyncio
+from unittest.mock import MagicMock, patch
 
 # The 'js' and 'pyodide' modules are already mocked in conftest.py
 import js
+import pytest
 
 # Import from the source package
 from pyodide_app.main import run
+
 
 @pytest.mark.asyncio
 async def test_run_async_integration():
@@ -26,6 +27,7 @@ async def test_run_async_integration():
         mock_document.getElementById.assert_called_once_with("title")
         assert mock_element.innerText == "Hello, World!"
 
+
 async def mock_pyfetch(url):
     mock_response = MagicMock()
 
@@ -34,6 +36,7 @@ async def mock_pyfetch(url):
 
     mock_response.bytes = mock_bytes
     return mock_response
+
 
 @pytest.mark.asyncio
 async def test_async_fetch_simulation():
