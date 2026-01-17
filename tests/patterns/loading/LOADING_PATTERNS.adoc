@@ -1,0 +1,56 @@
+= Loading Patterns
+
+This section covers strategies for loading Pyodide, Python packages, and handling various loading and runtime errors.
+
+== Package Loading Strategies
+
+Pyodide provides several ways to load packages. The choice depends on whether the package is built-in, on PyPI, or locally served.
+
+=== pyodide.loadPackage
+
+Used for loading built-in packages or wheels from a URL.
+
+[source,python]
+----
+include::test_packages.py[lines=12..25]
+----
+
+=== micropip.install
+
+The standard way to install packages from PyPI or from URLs with dependency resolution.
+
+.Installing from PyPI
+[source,python]
+----
+include::test_packages.py[lines=101..117]
+----
+
+.Installing from a local URL
+[source,python]
+----
+include::test_packages.py[lines=120..140]
+----
+
+== Error Handling
+
+Robust applications must handle network failures and Python runtime errors.
+
+=== Network Failures (404)
+
+Handling 404 errors during script or package loading.
+
+[source,python]
+----
+include::test_failures.py[lines=31..45]
+----
+
+=== Python Runtime Errors
+
+Capturing errors that occur during the execution of Python code in the browser.
+
+[source,python]
+----
+include::test_runtime_error.py[lines=11..18]
+----
+
+TIP: Always use meaningful timeouts when waiting for Pyodide to load, as it can take significantly longer than standard JS code.
