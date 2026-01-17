@@ -1,4 +1,6 @@
 pytest
 pytest-playwright
 pytest-asyncio
+nest-asyncio
 ruff
+mypy

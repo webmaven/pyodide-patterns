@@ -7,6 +7,7 @@ import threading
 from functools import partial
 from pathlib import Path
 
+import nest_asyncio
 import pytest
 from pyodide_version_mapping import PYODIDE_TO_PYTHON_VERSIONS
 
@@ -39,6 +40,7 @@ def pytest_configure(config):
     Validate that the local Python version matches the required version
     for the selected Pyodide version.
     """
+    nest_asyncio.apply()
     pyodide_version = config.getoption("--pyodide-version")
     if pyodide_version not in PYODIDE_TO_PYTHON_VERSIONS:
         pytest.exit(f"Unknown Pyodide version: {pyodide_version}", returncode=1)

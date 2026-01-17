@@ -56,8 +56,7 @@ def test_load_package_no_dependency_resolution(page: Page, live_server: str):
 
     # This test confirms that `loadPackage` does not resolve dependencies.
     result = page.evaluate(
-        "window.pyodide.runPython("
-        "'import pyodide_app; pyodide_app.main.run()')"
+        "window.pyodide.runPython('import pyodide_app; pyodide_app.main.run()')"
     )
     assert result is None
 
