@@ -16,9 +16,11 @@ async def handle_click(event: Any) -> None:
     button = js.document.getElementById("process-btn")
     output = js.document.getElementById("ui-output")
     status = js.document.getElementById("ui-status")
+    spinner = js.document.getElementById("ui-spinner")
     
     # 1. Update UI immediately (Main Thread)
     button.disabled = True
+    spinner.classList.remove("hidden")
     status.innerText = "Worker calculating (3s sleep)..."
     output.innerText = "..."
     
@@ -35,6 +37,7 @@ async def handle_click(event: Any) -> None:
         status.innerText = f"Error: {str(e)}"
     finally:
         button.disabled = False
+        spinner.classList.add("hidden")
 
 def setup_ui() -> None:
     # Bind the Python function to the JS button

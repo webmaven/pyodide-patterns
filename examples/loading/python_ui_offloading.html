@@ -4,13 +4,35 @@
     <title>Python UI Offloading Pattern</title>
     <script src="https://cdn.jsdelivr.net/npm/comlink/dist/umd/comlink.js"></script>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+    <style>
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
     <h1>Python-Centric UI Offloading</h1>
     <p>This page uses Python for <strong>both</strong> UI logic and heavy computation.</p>
     
     <div style="border: 1px solid #ccc; padding: 20px; border-radius: 8px;">
-        <p id="ui-status">Initial bootstrap...</p>
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <div id="ui-spinner" class="spinner hidden"></div>
+            <p id="ui-status" style="margin: 0;">Initial bootstrap...</p>
+        </div>
         <button id="process-btn" disabled>Run Background Python (3s)</button>
         <p>Result: <strong id="ui-output">None</strong></p>
     </div>
