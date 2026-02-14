@@ -15,6 +15,27 @@ How can we minimize user drop-off during the long initialization phase and provi
 ## Solution
 Implement a **Multi-Stage Bootstrapping** strategy that combines technical caching with UX feedback patterns.
 
+### Data Flow Overview
+```mermaid
+graph TD
+    subgraph Server
+        S[Python Source & Wheels]
+    end
+    subgraph Browser_JS
+        F[fetch API]
+        SW[Service Worker Cache]
+    end
+    subgraph Pyodide_WASM
+        VFS[Virtual File System]
+        PY[Python Runtime]
+    end
+
+    S -->|HTTP GET| F
+    SW -.->|Intercept / Cache| F
+    F -->|pyodide.FS.writeFile| VFS
+    VFS -->|import| PY
+```
+
 1.  **Immediate Background Start**: Start the `loadPyodide()` process as soon as the page begins to load, rather than waiting for user interaction or full UI rendering.
 2.  **Progressive Milestones**: Break the initialization into user-facing milestones (e.g., "Downloading Runtime", "Initializing Python", "Preparing Packages").
 3.  **Warm Starts (Caching)**: Use **Service Workers** (see Service Worker Caching pattern) to cache WASM assets locally, turning subsequent loads into "Warm Starts" that skip the download phase.

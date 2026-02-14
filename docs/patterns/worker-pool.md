@@ -15,6 +15,29 @@ How can we run multiple Python tasks in parallel while keeping the memory footpr
 ## Solution
 Implement a **Worker Pool** that manages a fixed set of "Warm" Pyodide workers and a **Task Queue**.
 
+### Worker Pool Architecture
+```mermaid
+graph LR
+    subgraph Main_Thread
+        App[Application Logic]
+        Queue[Task Queue]
+    end
+    
+    subgraph Pool_Manager
+        W1[Pyodide Worker 1]
+        W2[Pyodide Worker 2]
+        W3[Pyodide Worker 3]
+    end
+
+    App -->|push| Queue
+    Queue -->|dispatch| W1
+    Queue -->|dispatch| W2
+    Queue -->|dispatch| W3
+    W1 -->|return| App
+    W2 -->|return| App
+    W3 -->|return| App
+```
+
 1.  **Fixed Size**: Determine the pool size based on `navigator.hardwareConcurrency`.
 2.  **Pre-Initialization**: Bootstrap all workers in parallel during the application's splash screen.
 3.  **Task Queuing**: If all workers are busy, store tasks in a queue and dispatch them as workers become available.

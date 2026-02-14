@@ -15,6 +15,32 @@ How can we allow JavaScript and Python to read and write to the **exact same mem
 ## Solution
 Use **`SharedArrayBuffer`** as the underlying storage. Wrap it in a TypedArray (like `Float32Array`) and pass it into Pyodide. Python can then convert this proxy into a `memoryview` or a `NumPy` array that points to the **same physical bytes**.
 
+### Zero-Copy Memory Bridge
+```mermaid
+graph LR
+    subgraph Browser_Memory
+        SAB[[SharedArrayBuffer]]
+    end
+    
+    subgraph Main_Thread_JS
+        TV[TypedArray View]
+    end
+    
+    subgraph Pyodide_WASM
+        MV[memoryview]
+        NP[NumPy Array]
+    end
+    
+    subgraph GPU_Hardware
+        BUF[GPU Buffer]
+    end
+
+    TV --- SAB
+    MV --- SAB
+    NP --- MV
+    SAB -.->|device.queue.writeBuffer| BUF
+```
+
 1.  **Isolate the Page**: Serve the page with `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`.
 2.  **Create SAB**: `const sab = new SharedArrayBuffer(size)`.
 3.  **Bridge to Python**: Pass the JS TypedArray into Pyodide and use `.to_py()` to get a zero-copy memoryview.

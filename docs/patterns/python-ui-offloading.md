@@ -14,6 +14,23 @@ How can we write **UI logic in Python** that performs heavy background tasks wit
 
 ## Solution
 Use a **Hybrid Python Pattern**:
+
+### Architectural Overview
+```mermaid
+sequenceDiagram
+    participant User
+    participant Main_Python as Main Thread (Python)
+    participant Worker_Python as Worker Thread (Python)
+    participant DOM as Browser DOM
+
+    User->>Main_Python: Click Button
+    Main_Python->>DOM: Update Status ("Calculating...")
+    Main_Python->>Worker_Python: await js.worker.do_work()
+    Note right of Worker_Python: Heavy Data Processing
+    Worker_Python-->>Main_Python: Return Result
+    Main_Python->>DOM: Render Result
+```
+
 1.  **Main Thread Python**: Handles UI events, manipulates the DOM via the `js` module, and manages the application state.
 2.  **Worker Python**: Performs the "Heavy Lifting" (calculations, data processing).
 3.  **The Awaitable Bridge**: Use an RPC library (like Comlink) to expose the worker to the main thread. Pyodide automatically converts JS Promises into Python Awaitables, allowing you to `await` the worker's result directly in Python.
