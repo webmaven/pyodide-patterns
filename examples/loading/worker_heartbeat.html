@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Worker Heartbeat Pattern</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        #status-box { 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .alive { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .dead { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        button { padding: 10px 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Worker Heartbeat Pattern</h1>
+    <p>Detects silent worker crashes (e.g., infinite loops or OOM) using a periodic Ping/Pong handshake.</p>
+
+    <div id="status-box" class="warning">Initializing Worker...</div>
+    
+    <button id="btn-run">Run Normal Task</button>
+    <button id="btn-crash" style="background: #f8d7da;">Simulate Silent Crash</button>
+
+    <div id="log" style="margin-top: 20px; font-family: monospace; white-space: pre-wrap;"></div>
+
+    <script>
+        const statusBox = document.getElementById('status-box');
+        const log = document.getElementById('log');
+        let worker = new Worker('../js/heartbeat_worker.js');
+        let heartbeatTimer = null;
+        let lastPong = Date.now();
+
+        function updateStatus(msg, type) {
+            statusBox.innerText = msg;
+            statusBox.className = type;
+        }
+
+        function appendLog(msg) {
+            log.innerText += `[${new Date().toLocaleTimeString()}] ${msg}
+`;
+        }
+
+        function startHeartbeat(interval = 2000, timeout = 5000) {
+            if (heartbeatTimer) clearInterval(heartbeatTimer);
+            
+            lastPong = Date.now();
+            heartbeatTimer = setInterval(() => {
+                const now = Date.now();
+                
+                // Check for timeout
+                if (now - lastPong > timeout) {
+                    updateStatus("Worker CRASHED or HUNG!", "dead");
+                    appendLog("FATAL: Heartbeat timeout. Worker is unresponsive.");
+                    clearInterval(heartbeatTimer);
+                    worker.terminate();
+                    return;
+                }
+
+                // Send Ping
+                worker.postMessage({ type: "PING", id: now });
+                appendLog("Main: PING sent...");
+            }, interval);
+        }
+
+        worker.onmessage = (e) => {
+            if (e.data.type === "PONG") {
+                lastPong = Date.now();
+                updateStatus("Worker Alive (Heartbeat OK)", "alive");
+                appendLog("Main: PONG received.");
+            } else if (e.data.type === "RESULT") {
+                appendLog(`Main: Result received: ${e.data.result}`);
+            }
+        };
+
+        document.getElementById('btn-run').onclick = () => {
+            appendLog("Main: Running Python task...");
+            worker.postMessage({ type: "RUN", code: "sum(range(1000))" });
+        };
+
+        document.getElementById('btn-crash').onclick = () => {
+            appendLog("Main: Requesting crash demo (infinite loop)...");
+            worker.postMessage({ type: "CRASH_DEMO" });
+        };
+
+        updateStatus("Worker Active", "alive");
+        startHeartbeat();
+    </script>
+</body>
+</html>

@@ -9,6 +9,8 @@ This directory contains narrative documentation for the patterns implemented in 
 *   [Console Log Capturing](./console-log-capturing.md) - How to intercept and assert against browser logs.
 *   [Synchronous-Looking Async UI](./python-ui-offloading.md) - Writing 100% Python UIs that offload work to background threads.
 *   [Reactive UI Patterns](./reactive-ui.md) - Three ways to sync Python state with the DOM (Observer, VDOM, Signals).
+*   [Virtual Terminal](./virtual-terminal.md) - Redirecting stdout/stderr to a user-facing CLI in the browser.
+*   [Virtual FS Explorer](./vfs-explorer.md) - Visualizing and navigating the virtual file system in Python.
 *   [Deployment & Security Headers](./deployment-guide.md) - Enabling COOP/COEP on Vercel, Netlify, and GitHub Pages.
 
 ### 2. Testing Patterns
@@ -20,6 +22,7 @@ This directory contains narrative documentation for the patterns implemented in 
 *   [Worker Load Failure](./worker-load-failure.md) - Strategies for detecting when a worker script fails to load.
 *   [Cross-Origin Isolation](./cross-origin-isolation.md) - Enabling SharedArrayBuffer and native threading.
 *   [Worker RPC (Comlink)](./worker-rpc.md) - Using Comlink for clean communication between threads.
+*   [Worker Heartbeat](./worker-heartbeat.md) - Detecting silent worker crashes and infinite loops.
 *   [Worker Pool](./worker-pool.md) - Scaling Pyodide across multiple cores with task queuing.
 
 ### 4. Loading Patterns

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Virtual Terminal Pattern</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+    <script src="../js/pyodide_loader.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
+        #terminal { 
+            background: #1e1e1e; 
+            color: #d4d4d4; 
+            padding: 15px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            max-width: 800px;
+            margin: auto;
+        }
+        #term-output { 
+            height: 300px; 
+            overflow-y: auto; 
+            white-space: pre-wrap; 
+            font-family: 'Courier New', Courier, monospace;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+        #term-input { 
+            width: 100%; 
+            background: transparent; 
+            border: none; 
+            color: #00ff00; 
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1em;
+            outline: none;
+        }
+        .prompt { color: #00ff00; margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Python Virtual Terminal</h1>
+    <p>This terminal redirects Python's <code>stdout</code> and <code>stderr</code> to the browser UI.</p>
+
+    <div id="terminal">
+        <div id="term-output"></div>
+        <div style="display: flex;">
+            <span class="prompt">&gt;&gt;&gt;</span>
+            <input type="text" id="term-input" autofocus autocomplete="off">
+        </div>
+    </div>
+
+    <script>
+        async function init() {
+            const pyodide = await loadPyodideAndFiles(['terminal_controller.py']);
+            await pyodide.runPythonAsync("from pyodide_app import terminal_controller");
+        }
+        init().catch(console.error);
+    </script>
+</body>
+</html>
