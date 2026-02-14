@@ -1,5 +1,5 @@
 from typing import Any
-from pyodide_app.bridge import PythonVDOM, h
+from pyodide_app.bridge.vdom import PythonVDOM, h
 
 class CounterApp:
     def __init__(self, engine: PythonVDOM) -> None:

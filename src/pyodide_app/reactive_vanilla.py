@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
-from pyodide_app.bridge import observable, bind_to_dom
+from pyodide_app.bridge.reactivity import observable
+from pyodide_app.bridge import bind_to_dom
 
 @observable
 @dataclass

@@ -34,11 +34,11 @@ For a deep dive into the architectural reasoning behind these implementations, s
 
 ## 🛠️ The Unified Python Bridge
 
-All patterns leverage `src/pyodide_app/bridge.py`, a unified utility module that provides:
-*   **`Signal`**: Fine-grained reactivity.
-*   **`@observable`**: Dataclass-based state management.
-*   **`PythonVDOM`**: A pure Python Virtual DOM engine.
-*   **`keep_alive`**: Automatic proxy lifecycle management to prevent GC memory leaks.
+All patterns leverage `src/pyodide_app/bridge/`, a modular utility package that provides:
+*   **`bridge.reactivity.Signal`**: Fine-grained reactivity.
+*   **`bridge.reactivity.observable`**: Dataclass-based state management.
+*   **`bridge.vdom.PythonVDOM`**: A pure Python Virtual DOM engine.
+*   **`bridge.core.keep_alive`**: Automatic proxy lifecycle management to prevent GC memory leaks.
 
 ## 🚀 Getting Started
 

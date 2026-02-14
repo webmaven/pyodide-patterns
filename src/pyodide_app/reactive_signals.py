@@ -1,6 +1,7 @@
 import js
 from typing import Any
-from pyodide_app.bridge import Signal, keep_alive
+from pyodide_app.bridge.reactivity import Signal
+from pyodide_app.bridge.core import keep_alive
 from pyodide.ffi import create_proxy
 
 # Core Signals

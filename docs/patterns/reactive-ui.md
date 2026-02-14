@@ -61,6 +61,23 @@ Uses functional "Signal" objects that maintain their own list of subscribers.
     *   `examples/loading/reactive_vdom.html`
     *   `examples/loading/reactive_signals.html`
 
+## Implementation Example: Observer-based (Dataclasses)
+By leveraging the modular bridge, we can keep state definitions entirely Pythonic.
+
+```python
+from pyodide_app.bridge.reactivity import observable
+from dataclasses import dataclass
+
+@observable
+@dataclass
+class AppState:
+    count: int = 0
+
+state = AppState()
+state.subscribe("count", lambda v: print(f"Count is now {v}"))
+state.count += 1 # Triggers the print and any bound UI elements
+```
+
 ## Related Patterns
 *   **Synchronous-Looking Async UI**: Reactive patterns are the best way to display data arriving asynchronously from background workers.
 *   **Proxy Memory Management**: When using reactive components, always ensure that your event proxies are stored in a persistent Python variable to prevent premature cleanup by the garbage collector.
