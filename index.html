@@ -126,11 +126,20 @@
     <div class="grid">
         <div class="card">
             <span class="badge badge-loading">Optimization</span>
-            <h3>Bootstrapping & SW Caching</h3>
-            <p>Techniques for progressive loading and local caching of the Pyodide runtime.</p>
+            <h3>Bootstrapping & Milestones</h3>
+            <p>Techniques for progressive loading and user feedback during the Pyodide runtime initialization.</p>
             <div class="links">
                 <a href="examples/loading/progressive_bootstrapping.html">Live Demo</a>
                 <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/bootstrapping.md">Docs</a>
+            </div>
+        </div>
+        <div class="card">
+            <span class="badge badge-loading">Caching</span>
+            <h3>Service Worker Caching</h3>
+            <p>Turning "Cold Starts" into "Warm Starts" by caching WASM and wheels in the browser.</p>
+            <div class="links">
+                <a href="examples/loading/service_worker_cache.html">Live Demo</a>
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/service-worker-caching.md">Docs</a>
             </div>
         </div>
         <div class="card">
@@ -140,6 +149,93 @@
             <div class="links">
                 <a href="examples/loading/persistence.html">Live Demo</a>
                 <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/persistence.md">Docs</a>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">Infrastructure & Lifecycle Patterns</h2>
+    <div class="grid">
+        <div class="card">
+            <span class="badge badge-iso">Security</span>
+            <h3>Cross-Origin Isolation</h3>
+            <p>Deep dive into COOP/COEP headers and the requirements for SAB and threads.</p>
+            <div class="links">
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/cross-origin-isolation.md">Docs</a>
+            </div>
+        </div>
+        <div class="card">
+            <span class="badge badge-iso">Ops</span>
+            <h3>Deployment Guide</h3>
+            <p>Config snippets for GitHub Pages, Vercel, and Netlify security headers.</p>
+            <div class="links">
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/deployment-guide.md">Docs</a>
+            </div>
+        </div>
+        <div class="card">
+            <span class="badge badge-loading">Memory</span>
+            <h3>Memory Management & GC</h3>
+            <p>Managing the lifecycle of JS-Python proxies to prevent WASM heap fragmentation.</p>
+            <div class="links">
+                <a href="examples/loading/proxy_management.html">Live Demo</a>
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/memory-management.md">Docs</a>
+            </div>
+        </div>
+        <div class="card">
+            <span class="badge badge-worker">Lifecycle</span>
+            <h3>Worker Load Failure</h3>
+            <p>Detecting and recovering from errors that occur during background worker bootstrap.</p>
+            <div class="links">
+                <a href="examples/workers/worker_load_error.html">Live Demo</a>
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/worker-load-failure.md">Docs</a>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">Testing & QA Patterns</h2>
+    <div class="grid">
+        <div class="card">
+            <span class="badge badge-arch">Logic</span>
+            <h3>Unit Testing (CPython)</h3>
+            <p>Verifying Python logic in standard CPython without browser overhead.</p>
+            <div class="links">
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/unit-testing.md">Docs</a>
+            </div>
+        </div>
+        <div class="card">
+            <span class="badge badge-arch">Integration</span>
+            <h3>Integration Testing</h3>
+            <p>Mocking the browser environment to test Pyodide-JS interactions.</p>
+            <div class="links">
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/integration-testing.md">Docs</a>
+            </div>
+        </div>
+        <div class="card">
+            <span class="badge badge-arch">E2E</span>
+            <h3>E2E Testing (Playwright)</h3>
+            <p>Full-stack verification of Pyodide applications in real browser instances.</p>
+            <div class="links">
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/e2e-testing.md">Docs</a>
+            </div>
+        </div>
+        <div class="card">
+            <span class="badge badge-iso">Stability</span>
+            <h3>Test Suite Isolation</h3>
+            <p>Solving the "Event Loop Conflict" when running async tests in parallel.</p>
+            <div class="links">
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/test-suite-isolation.md">Docs</a>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">Utility & Debugging</h2>
+    <div class="grid">
+        <div class="card">
+            <span class="badge badge-arch">Observability</span>
+            <h3>Console Log Capturing</h3>
+            <p>Mirroring Python stdout to the browser console for developer visibility.</p>
+            <div class="links">
+                <a href="examples/js/error.js">Live Script</a>
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/console-log-capturing.md">Docs</a>
             </div>
         </div>
     </div>
