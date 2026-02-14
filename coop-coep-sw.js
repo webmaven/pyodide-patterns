@@ -12,6 +12,12 @@ if (typeof window === "undefined") {
     self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
     self.addEventListener("fetch", (event) => {
+        // Only intercept requests to our own origin to avoid breaking external CDNs
+        // that may not have CORP headers.
+        if (new URL(event.request.url).origin !== self.location.origin) {
+            return;
+        }
+
         if (event.request.cache === "only-if-cached" && event.request.mode !== "same-origin") {
             return;
         }
