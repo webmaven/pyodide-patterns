@@ -13,7 +13,6 @@ if (typeof window === "undefined") {
 
     self.addEventListener("fetch", (event) => {
         // Only intercept requests to our own origin to avoid breaking external CDNs
-        // that may not have CORP headers.
         if (new URL(event.request.url).origin !== self.location.origin) {
             return;
         }
@@ -30,8 +29,13 @@ if (typeof window === "undefined") {
                     }
 
                     const newHeaders = new Headers(response.headers);
+                    // Standard COOP/COEP
                     newHeaders.set("Cross-Origin-Embedder-Policy", "require-corp");
                     newHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
+                    
+                    // CRITICAL: Also set Cross-Origin-Resource-Policy so that the 
+                    // browser allows these resources to be loaded in an isolated environment.
+                    newHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
 
                     return new Response(response.body, {
                         status: response.status,

@@ -4,14 +4,14 @@
  * to enable standard imports.
  */
 
-// Get the base URL of this loader script to resolve relative paths correctly
-const LOADER_BASE_URL = new URL(document.currentScript.src).href.replace(/js\/pyodide_loader\.js$/, '');
+// Get the base URL of the project root
+// If script is at /examples/js/pyodide_loader.js, root is /
+const SCRIPT_URL = new URL(document.currentScript.src);
+const PROJECT_ROOT = SCRIPT_URL.href.replace(/examples\/js\/pyodide_loader\.js$/, '');
 
-window.loadPyodideAndFiles = async (files = [], srcPrefix = null) => {
-    // If no prefix is provided, we assume src is sibling to the loader's parent dir
-    // e.g. /examples/js/pyodide_loader.js -> /src/pyodide_app/
-    const defaultSrcPrefix = LOADER_BASE_URL + '../src/pyodide_app/';
-    const prefix = srcPrefix || defaultSrcPrefix;
+window.loadPyodideAndFiles = async (files = []) => {
+    console.log(`Loader: Project Root detected as: ${PROJECT_ROOT}`);
+    const prefix = PROJECT_ROOT + 'src/pyodide_app/';
 
     const pyodide = await loadPyodide();
     
@@ -25,10 +25,18 @@ window.loadPyodideAndFiles = async (files = [], srcPrefix = null) => {
     
     const loadFile = async (url, dest) => {
         console.log(`Loader: Fetching ${url} -> pyodide_app/${dest}`);
-        const resp = await fetch(url);
-        if (!resp.ok) throw new Error(`Failed to fetch ${url} (Status: ${resp.status})`);
-        const text = await resp.text();
-        pyodide.FS.writeFile(`pyodide_app/${dest}`, text);
+        try {
+            const resp = await fetch(url);
+            if (!resp.ok) {
+                console.error(`Loader: 404 for ${url}`);
+                throw new Error(`Failed to fetch ${url} (Status: ${resp.status})`);
+            }
+            const text = await resp.text();
+            pyodide.FS.writeFile(`pyodide_app/${dest}`, text);
+        } catch (err) {
+            console.error(`Loader: Fatal error fetching ${url}:`, err);
+            throw err;
+        }
     };
 
     // Always load the bridge module files
