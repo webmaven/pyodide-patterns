@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Signal Reactivity (Fine-grained)</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+    <style>
+        .card { border: 1px solid #ddd; padding: 20px; border-radius: 8px; max-width: 400px; transition: all 0.3s; }
+        button { cursor: pointer; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Signal Reactivity (Fine-grained)</h1>
+    <p>Using independent "Signals" in Python. No VDOM, only specific elements re-render.</p>
+
+    <div id="sig-card" class="card">
+        <p>The count is: <strong id="sig-count">0</strong></p>
+        <p>Double the count: <strong id="sig-double">0</strong></p>
+        
+        <button id="sig-inc">Increment</button>
+        <button id="sig-theme">Toggle Theme</button>
+    </div>
+
+    <script src="../js/pyodide_loader.js"></script>
+    <script>
+        async function init() {
+            const pyodide = await loadPyodideAndFiles(['reactive_signals.py']);
+            await pyodide.runPythonAsync("from pyodide_app import reactive_signals");
+        }
+        init();
+    </script>
+</body>
+</html>

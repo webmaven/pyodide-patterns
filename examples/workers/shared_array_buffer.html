@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SharedArrayBuffer Test</title>
+</head>
+<body>
+    <h1>SharedArrayBuffer Status</h1>
+    <p id="status">Checking...</p>
+    <p id="coop-coep">Checking headers...</p>
+
+    <script>
+        const status = document.getElementById('status');
+        const coopCoep = document.getElementById('coop-coep');
+
+        // Check if the environment is cross-origin isolated
+        if (window.crossOriginIsolated) {
+            coopCoep.textContent = "Environment is cross-origin isolated (COOP/COEP active).";
+        } else {
+            coopCoep.textContent = "Environment is NOT cross-origin isolated.";
+        }
+
+        // Check if SharedArrayBuffer is available
+        try {
+            if (typeof SharedArrayBuffer !== 'undefined') {
+                const sab = new SharedArrayBuffer(1024);
+                status.textContent = "SharedArrayBuffer is AVAILABLE.";
+                status.style.color = "green";
+            } else {
+                status.textContent = "SharedArrayBuffer is NOT defined.";
+                status.style.color = "red";
+            }
+        } catch (e) {
+            status.textContent = "Error accessing SharedArrayBuffer: " + e.message;
+            status.style.color = "orange";
+        }
+    </script>
+</body>
+</html>

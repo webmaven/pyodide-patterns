@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Proxy Memory Management</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+</head>
+<body>
+    <h1>Proxy Memory Management</h1>
+    <p id="status">Loading Pyodide...</p>
+    <button id="leak-btn" disabled>Leak 1000 Proxies</button>
+    <button id="cleanup-btn" disabled>Create & Destroy 1000 Proxies</button>
+    <pre id="output"></pre>
+
+    <script>
+        const status = document.getElementById('status');
+        const output = document.getElementById('output');
+        const leakBtn = document.getElementById('leak-btn');
+        const cleanupBtn = document.getElementById('cleanup-btn');
+
+        let pyodide;
+
+        async function init() {
+            pyodide = await loadPyodide();
+            status.textContent = "Pyodide Ready.";
+            leakBtn.disabled = false;
+            cleanupBtn.disabled = false;
+        }
+
+        // Strategy 1: Leaking
+        leakBtn.onclick = () => {
+            const start = performance.now();
+            for (let i = 0; i < 1000; i++) {
+                // This creates a Python list and returns a JS Proxy
+                // We don't call .destroy(), so the Python list stays alive in the WASM heap
+                const proxy = pyodide.runPython("[1, 2, 3] * 10");
+            }
+            const end = performance.now();
+            output.textContent += `Leaked 1000 proxies in ${Math.round(end - start)}ms. Memory usage will grow.
+`;
+        };
+
+        // Strategy 2: Manual Cleanup
+        cleanupBtn.onclick = () => {
+            const start = performance.now();
+            for (let i = 0; i < 1000; i++) {
+                const proxy = pyodide.runPython("[1, 2, 3] * 10");
+                // Explicitly destroy the proxy to allow Python GC to collect the object
+                proxy.destroy();
+            }
+            const end = performance.now();
+            output.textContent += `Created and destroyed 1000 proxies in ${Math.round(end - start)}ms. Memory is reclaimed.
+`;
+        };
+
+        init();
+    </script>
+</body>
+</html>

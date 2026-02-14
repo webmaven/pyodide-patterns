@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Observer Reactivity (No VDOM)</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+    <style>
+        .card { border: 1px solid #ddd; padding: 20px; border-radius: 8px; max-width: 400px; }
+        .badge { background: #eee; padding: 2px 5px; border-radius: 3px; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <h1>Observer Reactivity (No VDOM)</h1>
+    <p>State is managed in a Python class. Changing attributes triggers targeted DOM updates.</p>
+
+    <div class="card">
+        <h2>Hello, <span id="name-display">...</span>!</h2>
+        <p>The count is: <strong id="count-display">0</strong> 
+           <span id="count-badge" class="badge" title="Initial">Hover for count</span></p>
+        
+        <input type="text" id="name-input" placeholder="Type your name">
+        <button id="inc-btn">Increment Counter</button>
+    </div>
+
+    <script src="../js/pyodide_loader.js"></script>
+    <script>
+        async function init() {
+            const pyodide = await loadPyodideAndFiles(['reactive_vanilla.py']);
+            await pyodide.runPythonAsync("from pyodide_app import reactive_vanilla");
+
+            // Bind JS events to Python functions
+            document.getElementById('inc-btn').onclick = () => pyodide.runPython("reactive_vanilla.increment()");
+            document.getElementById('name-input').oninput = (e) => {
+                pyodide.globals.set("temp_event", e);
+                pyodide.runPython("reactive_vanilla.update_name(temp_event)");
+            };
+        }
+        init();
+    </script>
+</body>
+</html>

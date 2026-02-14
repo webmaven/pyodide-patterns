@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Python UI Offloading Pattern</title>
+    <script src="https://cdn.jsdelivr.net/npm/comlink/dist/umd/comlink.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+</head>
+<body>
+    <h1>Python-Centric UI Offloading</h1>
+    <p>This page uses Python for <strong>both</strong> UI logic and heavy computation.</p>
+    
+    <div style="border: 1px solid #ccc; padding: 20px; border-radius: 8px;">
+        <p id="ui-status">Initial bootstrap...</p>
+        <button id="process-btn" disabled>Run Background Python (3s)</button>
+        <p>Result: <strong id="ui-output">None</strong></p>
+    </div>
+
+    <script>
+        async function init() {
+            const status = document.getElementById('ui-status');
+            
+            // 1. Setup the Worker Bridge (JS side)
+            const worker = new Worker('../js/comlink_worker.js');
+            window.worker_bridge = Comlink.wrap(worker);
+            await window.worker_bridge.init();
+
+            // 2. Setup the Main Thread Pyodide
+            const pyodide = await loadPyodide();
+            
+            // 3. Fetch and Run the Python UI Logic
+            status.textContent = "Loading Python UI Controller...";
+            const response = await fetch('../../src/pyodide_app/ui_controller.py');
+            const code = await response.text();
+            await pyodide.runPythonAsync(code);
+            
+            document.getElementById('process-btn').disabled = false;
+        }
+
+        init().catch(console.error);
+    </script>
+</body>
+</html>

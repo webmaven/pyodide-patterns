@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Worker Pool Pattern</title>
+    <script src="https://cdn.jsdelivr.net/npm/comlink/dist/umd/comlink.js"></script>
+    <script src="../js/pool_manager.js"></script>
+    <style>
+        .task-log { font-family: monospace; background: #f0f0f0; padding: 10px; margin: 5px 0; border-radius: 4px; }
+        .success { border-left: 5px solid green; }
+    </style>
+</head>
+<body>
+    <h1>Pyodide Worker Pool</h1>
+    <p id="status">Initializing pool (2 workers)...</p>
+    <button id="run-batch-btn" disabled>Run 4 Tasks (2s sleep each)</button>
+    <div id="results"></div>
+
+    <script>
+        const status = document.getElementById('status');
+        const results = document.getElementById('results');
+        const runBtn = document.getElementById('run-batch-btn');
+
+        // Initialize a pool with 2 workers for demonstration
+        const pool = new PyodidePool('../js/comlink_worker.js', 2);
+
+        async function init() {
+            await pool.init();
+            status.textContent = "Pool Ready. Running 2 workers.";
+            runBtn.disabled = false;
+        }
+
+        runBtn.onclick = async () => {
+            runBtn.disabled = true;
+            results.innerHTML = "";
+            const startTime = performance.now();
+            
+            // Dispatch 4 tasks. With 2 workers, this should take ~4s total 
+            // (2 batches of 2s each).
+            const tasks = [
+                "import time; time.sleep(2); 'Task 1 Done'",
+                "import time; time.sleep(2); 'Task 2 Done'",
+                "import time; time.sleep(2); 'Task 3 Done'",
+                "import time; time.sleep(2); 'Task 4 Done'"
+            ];
+
+            status.textContent = "Processing batch...";
+
+            const taskPromises = tasks.map((code, i) => {
+                const logEl = document.createElement('div');
+                logEl.className = "task-log";
+                logEl.textContent = `Task ${i+1}: Pending...`;
+                results.appendChild(logEl);
+
+                return pool.run(code).then(res => {
+                    logEl.textContent = `Task ${i+1}: ${res}`;
+                    logEl.classList.add('success');
+                });
+            });
+
+            await Promise.all(taskPromises);
+            
+            const endTime = performance.now();
+            const totalTime = ((endTime - startTime) / 1000).toFixed(2);
+            status.textContent = `Batch complete in ${totalTime}s (Total serial time would be 8s).`;
+            runBtn.disabled = false;
+        };
+
+        init().catch(err => {
+            status.textContent = "Error: " + err.message;
+            console.error(err);
+        });
+    </script>
+</body>
+</html>

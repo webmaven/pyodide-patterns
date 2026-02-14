@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Progressive Bootstrapping Pattern</title>
+    <style>
+        .progress-container { width: 100%; background-color: #f3f3f3; border-radius: 5px; margin: 10px 0; }
+        .progress-bar { width: 0%; height: 20px; background-color: #4caf50; border-radius: 5px; transition: width 0.3s; }
+        .milestone { color: #666; font-size: 0.9em; margin: 5px 0; }
+        .milestone.complete { color: #4caf50; font-weight: bold; }
+        #app-content { display: none; padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Pyodide Progressive Bootstrapping</h1>
+    
+    <div id="loader">
+        <p id="status">Initializing background bootstrap...</p>
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="milestones">
+            <div id="m-wasm" class="milestone">○ WASM Runtime</div>
+            <div id="m-python" class="milestone">○ Python Environment</div>
+            <div id="m-packages" class="milestone">○ Packages (NumPy)</div>
+        </div>
+    </div>
+
+    <div id="app-content">
+        <h2>App is Ready!</h2>
+        <p>This content was hidden until the full "Warm Start" was achieved.</p>
+        <pre id="output"></pre>
+    </div>
+
+    <script>
+        const progressBar = document.getElementById('progress-bar');
+        const status = document.getElementById('status');
+        const appContent = document.getElementById('app-content');
+        const loader = document.getElementById('loader');
+
+        function updateMilestone(id, text) {
+            const el = document.getElementById(id);
+            el.textContent = "● " + text;
+            el.className = "milestone complete";
+        }
+
+        async function bootstrap() {
+            const start = performance.now();
+            
+            // Milestone 1: Load Pyodide Script (WASM Runtime)
+            status.textContent = "Downloading WASM runtime...";
+            progressBar.style.width = "20%";
+            
+            // We can use the script injection pattern or just await loadPyodide
+            // For feedback during download, one would typically use fetch() with progress tracking
+            // but for this pattern we simulate milestones.
+            const pyodide = await loadPyodide({
+                indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/"
+            });
+            updateMilestone('m-wasm', "WASM Runtime Loaded");
+            progressBar.style.width = "50%";
+
+            // Milestone 2: Initialize Python Environment
+            status.textContent = "Bootstrapping Python environment...";
+            await pyodide.runPythonAsync("import sys; sys.version");
+            updateMilestone('m-python', "Python Environment Ready");
+            progressBar.style.width = "75%";
+
+            // Milestone 3: Load heavy packages
+            status.textContent = "Installing heavy packages (NumPy)...";
+            await pyodide.loadPackage("numpy");
+            updateMilestone('m-packages', "NumPy Ready");
+            progressBar.style.width = "100%";
+
+            const end = performance.now();
+            const duration = ((end - start) / 1000).toFixed(2);
+            
+            status.textContent = `Bootstrap complete in ${duration}s!`;
+            
+            // Reveal App
+            setTimeout(() => {
+                loader.style.display = 'none';
+                appContent.style.display = 'block';
+                document.getElementById('output').textContent = pyodide.runPython("import numpy; f'NumPy version: {numpy.__version__}'");
+            }, 500);
+        }
+
+        // START BOOTSTRAPPING IMMEDIATELY (Background Pattern)
+        // This gives the "appearance" of a faster start if the user is 
+        // still looking at headlines or intro text.
+        window.addEventListener('DOMContentLoaded', () => {
+            bootstrap().catch(err => {
+                status.textContent = "Bootstrap Error: " + err.message;
+                status.style.color = "red";
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+</body>
+</html>

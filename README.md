@@ -1,5 +1,7 @@
 # Pyodide Patterns Cookbook
 
+![Tests](https://github.com/webmaven/pyodide-patterns/actions/workflows/test.yml/badge.svg)
+
 A comprehensive collection of testing, debugging, and architectural patterns for building production-ready Pyodide applications.
 
 ## Overview
@@ -10,6 +12,10 @@ This project serves as a "cookbook" and reference implementation for developers 
 *   **Debugging**: Tactics for diagnosing issues in the browser (console logs, network errors, Web Workers).
 *   **Loading**: Strategies for efficient package loading and error handling, including runtime errors.
 *   **Workers**: Patterns for running Python code in Web Workers, including load failure handling.
+
+## Documentation
+
+For a deep dive into the architectural reasoning behind these patterns, see our [Narrative Pattern Language](docs/README.md).
 
 ## Project Structure
 

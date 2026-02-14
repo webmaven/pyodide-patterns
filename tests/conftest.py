@@ -76,6 +76,15 @@ class CorsHandler(http.server.SimpleHTTPRequestHandler):
         return super().end_headers()
 
 
+class CrossOriginIsolatedHandler(CorsHandler):
+    """Handler that sends COOP and COEP headers to enable SharedArrayBuffer."""
+
+    def end_headers(self):
+        self.send_header("Cross-Origin-Opener-Policy", "same-origin")
+        self.send_header("Cross-Origin-Embedder-Policy", "require-corp")
+        return super().end_headers()
+
+
 class NoCorsHandler(http.server.SimpleHTTPRequestHandler):
     """Handler that does **not** send CORS headers (default behavior)."""
 
@@ -114,7 +123,7 @@ def live_server(pyodide_version: str) -> Generator[str, None, None]:
         def __init__(self, *args, **kwargs):
             super().__init__(*args, directory=str(project_root), **kwargs)
 
-        def do_GET(self):
+        def do_GET(self):  # noqa: N802
             if self.path == "/index.html" or self.path == "/":
                 self.send_response(200)
                 self.send_header("Content-type", "text/html")
@@ -142,6 +151,28 @@ def cross_origin_server() -> Generator[str, None, None]:
     web_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     handler = partial(NoCorsHandler, directory=web_root)
     with socketserver.TCPServer(("localhost", 0), handler) as httpd:
+        host, port = cast(tuple[str, int], httpd.server_address)
+        base_url = f"http://{host}:{port}"
+        server_thread = threading.Thread(target=httpd.serve_forever)
+        server_thread.daemon = True
+        server_thread.start()
+        yield base_url
+        httpd.shutdown()
+        server_thread.join()
+
+
+@pytest.fixture(scope="session")
+def isolated_server(pyodide_version: str) -> Generator[str, None, None]:
+    """
+    A server that provides COOP/COEP headers to enable cross-origin isolation.
+    """
+    project_root = Path(__file__).parent.parent
+
+    class IsolatedHandler(CrossOriginIsolatedHandler):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, directory=str(project_root), **kwargs)
+
+    with socketserver.TCPServer(("localhost", 0), IsolatedHandler) as httpd:
         host, port = cast(tuple[str, int], httpd.server_address)
         base_url = f"http://{host}:{port}"
         server_thread = threading.Thread(target=httpd.serve_forever)

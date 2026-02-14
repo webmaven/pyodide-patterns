@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Service Worker Caching</title>
+</head>
+<body>
+    <h1>Service Worker Caching</h1>
+    <p id="sw-status">Service Worker: Unregistered</p>
+    <p id="pyodide-status">Pyodide: Not loaded</p>
+
+    <script>
+        const swStatus = document.getElementById('sw-status');
+        const pyodideStatus = document.getElementById('pyodide-status');
+
+        async function init() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.register('../js/service_worker.js');
+                    swStatus.textContent = "Service Worker: Registered";
+                    
+                    // Wait for the service worker to be ready and controlling the page
+                    await navigator.serviceWorker.ready;
+                    
+                    // Small delay to ensure controller is set
+                    if (!navigator.serviceWorker.controller) {
+                        swStatus.textContent = "Service Worker: Active. Refreshing once...";
+                        // Use a flag to avoid reload loops
+                        if (!window.location.search.includes('reloaded=true')) {
+                            window.location.href = window.location.href + (window.location.search ? '&' : '?') + 'reloaded=true';
+                            return;
+                        }
+                    }
+                    
+                    swStatus.textContent = "Service Worker: Active and Controlling Page";
+                    loadPyodideRuntime();
+                } catch (err) {
+                    swStatus.textContent = "Service Worker: Error - " + err.message;
+                }
+            } else {
+                swStatus.textContent = "Service Worker: Not supported in this browser.";
+            }
+        }
+
+        async function loadPyodideRuntime() {
+            pyodideStatus.textContent = "Pyodide: Loading...";
+            const start = performance.now();
+            
+            const script = document.createElement('script');
+            script.src = "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js";
+            script.onload = async () => {
+                await loadPyodide();
+                const end = performance.now();
+                pyodideStatus.textContent = `Pyodide: Loaded in ${((end - start) / 1000).toFixed(2)}s`;
+            };
+            document.head.appendChild(script);
+        }
+
+        init();
+    </script>
+</body>
+</html>

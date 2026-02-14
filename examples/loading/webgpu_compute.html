@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebGPU Compute Pattern</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+</head>
+<body>
+    <h1>WebGPU Compute with Pyodide</h1>
+    <p id="status">Loading Pyodide...</p>
+    <p id="gpu-support">Checking WebGPU support...</p>
+    <button id="compute-btn" disabled>Run GPU Compute</button>
+    <pre id="output"></pre>
+
+    <script>
+        const status = document.getElementById('status');
+        const gpuSupport = document.getElementById('gpu-support');
+        const output = document.getElementById('output');
+        const computeBtn = document.getElementById('compute-btn');
+
+        let pyodide;
+
+        async function init() {
+            if (!navigator.gpu) {
+                gpuSupport.textContent = "WebGPU is NOT supported in this browser.";
+                gpuSupport.style.color = "red";
+            } else {
+                gpuSupport.textContent = "WebGPU is supported.";
+                gpuSupport.style.color = "green";
+            }
+
+            pyodide = await loadPyodide();
+            await pyodide.loadPackage("numpy");
+            status.textContent = "Pyodide Ready.";
+            if (navigator.gpu) {
+                computeBtn.disabled = false;
+            }
+        }
+
+        computeBtn.onclick = async () => {
+            output.textContent = "Running compute shader...
+";
+            try {
+                const result = await pyodide.runPythonAsync(`
+import js
+import numpy as np
+
+async def run_webgpu_test():
+    if not hasattr(js.navigator, "gpu"):
+        return "WebGPU missing in JS environment"
+    
+    adapter = await js.navigator.gpu.requestAdapter()
+    device = await adapter.requestDevice()
+    
+    # 1. Prepare data
+    input_data = np.array([1.0, 2.0, 3.0, 4.0], dtype=np.float32)
+    
+    # 2. Create buffers
+    # We use memoryview to pass data efficiently from WASM to JS
+    size = input_data.nbytes
+    gpu_input_buffer = device.createBuffer({
+        "size": size,
+        "usage": js.GPUBufferUsage.STORAGE | js.GPUBufferUsage.COPY_DST
+    })
+    
+    gpu_output_buffer = device.createBuffer({
+        "size": size,
+        "usage": js.GPUBufferUsage.STORAGE | js.GPUBufferUsage.COPY_SRC
+    })
+    
+    gpu_read_buffer = device.createBuffer({
+        "size": size,
+        "usage": js.GPUBufferUsage.COPY_DST | js.GPUBufferUsage.MAP_READ
+    })
+
+    # Write data to GPU
+    device.queue.writeBuffer(gpu_input_buffer, 0, input_data.data)
+
+    # 3. Shader code (WGSL)
+    shader_code = """
+    @group(0) @binding(0) var<storage, read> input: array<f32>;
+    @group(0) @binding(1) var<storage, read_write> output: array<f32>;
+
+    @compute @workgroup_size(1)
+    fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
+        output[global_id.x] = input[global_id.x] * 2.0;
+    }
+    """
+    
+    # 4. Setup pipeline
+    shader_module = device.createShaderModule({"code": shader_code})
+    compute_pipeline = device.createComputePipeline({
+        "layout": "auto",
+        "compute": {
+            "module": shader_module,
+            "entryPoint": "main"
+        }
+    })
+
+    # 5. Bind groups
+    bind_group = device.createBindGroup({
+        "layout": compute_pipeline.getBindGroupLayout(0),
+        "entries": [
+            {"binding": 0, "resource": {"buffer": gpu_input_buffer}},
+            {"binding": 1, "resource": {"buffer": gpu_output_buffer}}
+        ]
+    })
+
+    # 6. Dispatch
+    command_encoder = device.createCommandEncoder()
+    pass_encoder = command_encoder.beginComputePass()
+    pass_encoder.setPipeline(compute_pipeline)
+    pass_encoder.setBindGroup(0, bind_group)
+    pass_encoder.dispatchWorkgroups(4)
+    pass_encoder.end()
+
+    # Copy output to readable buffer
+    command_encoder.copyBufferToBuffer(gpu_output_buffer, 0, gpu_read_buffer, 0, size)
+    
+    device.queue.submit([command_encoder.finish()])
+
+    # 7. Read results
+    await gpu_read_buffer.mapAsync(js.GPUMapMode.READ)
+    copy_array = gpu_read_buffer.getMappedRange()
+    
+    # Convert result back to numpy or list
+    # We must wrap the ArrayBuffer in a Float32Array first
+    result_data = np.frombuffer(copy_array.to_py(), dtype=np.float32).copy()
+    gpu_read_buffer.unmap()
+    
+    return result_data.tolist()
+
+await run_webgpu_test()
+                `);
+                output.textContent += "Result: " + JSON.stringify(result);
+            } catch (err) {
+                output.textContent += "Error: " + err.message;
+                console.error(err);
+            }
+        };
+
+        init();
+    </script>
+</body>
+</html>

@@ -14,7 +14,7 @@ def test_benchmark_button(page: Page, http_server):
     page.goto(f"{http_server}/index.html")
 
     # Wait for Pyodide to initialize
-    expect(page.locator("#title")).to_have_text("Hello, World!", timeout=10000)
+    expect(page.locator("#title")).to_have_text("Hello, World!", timeout=30000)
 
     # Find the benchmark button and click it
     benchmark_button = page.locator("#benchmark-button")

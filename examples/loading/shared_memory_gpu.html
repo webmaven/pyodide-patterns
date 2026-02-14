@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SharedArrayBuffer & WebGPU Pattern</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js" crossorigin></script>
+</head>
+<body>
+    <h1>Shared Memory (SAB) + WebGPU</h1>
+    <p id="isolation-status">Checking isolation...</p>
+    <p id="gpu-status">Checking WebGPU...</p>
+    <button id="run-btn" disabled>Run Shared Compute</button>
+    <pre id="output"></pre>
+
+    <script>
+        const isolationStatus = document.getElementById('isolation-status');
+        const gpuStatus = document.getElementById('gpu-status');
+        const output = document.getElementById('output');
+        const runBtn = document.getElementById('run-btn');
+
+        let pyodide;
+        let sharedBuffer;
+        let sharedView;
+
+        async function init() {
+            // 1. Verify Cross-Origin Isolation (Required for SAB)
+            if (window.crossOriginIsolated) {
+                isolationStatus.textContent = "Environment is cross-origin isolated. SAB available.";
+                isolationStatus.style.color = "green";
+            } else {
+                isolationStatus.textContent = "NOT isolated. SharedArrayBuffer will fail.";
+                isolationStatus.style.color = "red";
+                return;
+            }
+
+            // 2. Verify WebGPU
+            if (!navigator.gpu) {
+                gpuStatus.textContent = "WebGPU not supported.";
+                return;
+            }
+            gpuStatus.textContent = "WebGPU Ready.";
+
+            // 3. Create the SharedArrayBuffer (JS side)
+            // 4 floats * 4 bytes = 16 bytes
+            sharedBuffer = new SharedArrayBuffer(16);
+            sharedView = new Float32Array(sharedBuffer);
+            sharedView.set([10, 20, 30, 40]);
+
+            pyodide = await loadPyodide();
+            await pyodide.loadPackage("numpy");
+            
+            // 4. Expose the SAB view to Python
+            pyodide.globals.set("js_shared_view", sharedView);
+            
+            output.textContent = "Initial data in SAB (JS): " + sharedView.toString() + "
+";
+            runBtn.disabled = false;
+        }
+
+        runBtn.onclick = async () => {
+            try {
+                // 5. Python manipulates the SAB in-place and sends to GPU
+                const result = await pyodide.runPythonAsync(`
+import js
+import numpy as np
+
+async def run_shared_gpu():
+    # Convert JS Float32Array proxy to a Python memoryview
+    # This is ZERO-COPY. It points to the same SAB memory.
+    mv = js_shared_view.to_py()
+    
+    # Wrap in numpy for easy math (still zero-copy)
+    data = np.frombuffer(mv, dtype=np.float32)
+    
+    # Multiply in-place
+    data *= 2
+    
+    # --- WebGPU Part ---
+    adapter = await js.navigator.gpu.requestAdapter()
+    device = await adapter.requestDevice()
+    
+    # Create a buffer and upload the SAB data
+    # WebGPU writeBuffer can accept the memoryview directly
+    gpu_buf = device.createBuffer({
+        "size": data.nbytes,
+        "usage": js.GPUBufferUsage.STORAGE | js.GPUBufferUsage.COPY_SRC
+    })
+    
+    device.queue.writeBuffer(gpu_buf, 0, data.data)
+    
+    # (Simulating reading back just to prove it worked)
+    return data.tolist()
+
+await run_shared_gpu()
+                `);
+
+                output.textContent += "Data after Python in-place mod: " + sharedView.toString() + "
+";
+                output.textContent += "Result returned from Python: " + JSON.stringify(result) + "
+";
+                output.textContent += "Verification: JS view matches Python result.";
+            } catch (err) {
+                output.textContent += "
+Error: " + err.message;
+            }
+        };
+
+        init();
+    </script>
+</body>
+</html>

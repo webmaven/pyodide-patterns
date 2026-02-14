@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pyodide Persistence Pattern</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+</head>
+<body>
+    <h1>Persistent File System (IDBFS)</h1>
+    <p id="status">Loading Pyodide...</p>
+    
+    <div>
+        <input type="text" id="file-content" placeholder="Enter some text to save">
+        <button id="save-btn" disabled>Save to /data/test.txt</button>
+    </div>
+    
+    <div style="margin-top: 20px;">
+        <button id="load-btn" disabled>Read from /data/test.txt</button>
+        <p>File Content: <strong id="output">None</strong></p>
+    </div>
+
+    <script>
+        const status = document.getElementById('status');
+        const output = document.getElementById('output');
+        const saveBtn = document.getElementById('save-btn');
+        const loadBtn = document.getElementById('load-btn');
+        const input = document.getElementById('file-content');
+
+        let pyodide;
+
+        // Helper to wrap Emscripten FS.syncfs in a Promise
+        function syncFileSystem(toBytecode) {
+            return new Promise((resolve, reject) => {
+                pyodide.FS.syncfs(toBytecode, (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                });
+            });
+        }
+
+        async function init() {
+            pyodide = await loadPyodide();
+            
+            // 1. Create a mount point
+            pyodide.FS.mkdir('/data');
+            
+            // 2. Mount IndexedDB to that folder
+            pyodide.FS.mount(pyodide.FS.filesystems.IDBFS, {}, '/data');
+            
+            // 3. Sync FROM IndexedDB to the WASM memory (Load existing data)
+            status.textContent = "Syncing from IndexedDB...";
+            await syncFileSystem(true);
+            
+            status.textContent = "Pyodide Ready. File system mounted.";
+            saveBtn.disabled = false;
+            loadBtn.disabled = false;
+        }
+
+        saveBtn.onclick = async () => {
+            const text = input.value;
+            try {
+                // Write using standard Python file I/O
+                pyodide.runPython(`
+                    with open('/data/test.txt', 'w') as f:
+                        f.write('${text}')
+                `);
+                
+                // 4. Sync FROM WASM memory to IndexedDB (Persist to disk)
+                status.textContent = "Saving to IndexedDB...";
+                await syncFileSystem(false);
+                status.textContent = "Saved successfully!";
+            } catch (err) {
+                status.textContent = "Save Error: " + err.message;
+            }
+        };
+
+        loadBtn.onclick = () => {
+            try {
+                const content = pyodide.runPython(`
+import os
+res = "File not found"
+if os.path.exists('/data/test.txt'):
+    with open('/data/test.txt', 'r') as f:
+        res = f.read()
+res
+                `);
+                output.textContent = content;
+            } catch (err) {
+                output.textContent = "Read Error: " + err.message;
+            }
+        };
+
+        init();
+    </script>
+</body>
+</html>

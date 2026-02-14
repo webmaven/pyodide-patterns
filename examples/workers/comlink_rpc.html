@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Comlink RPC Pattern</title>
+    <script src="https://cdn.jsdelivr.net/npm/comlink/dist/umd/comlink.js"></script>
+</head>
+<body>
+    <h1>Comlink RPC Pattern</h1>
+    <p id="status">Loading Worker...</p>
+    <button id="run-btn" disabled>Run Python (2+2)</button>
+    <pre id="output"></pre>
+
+    <script>
+        const status = document.getElementById('status');
+        const output = document.getElementById('output');
+        const runBtn = document.getElementById('run-btn');
+
+        async function init() {
+            const worker = new Worker('../js/comlink_worker.js');
+            const pyodideWorker = Comlink.wrap(worker);
+
+            status.textContent = "Initializing Pyodide...";
+            await pyodideWorker.init();
+            
+            status.textContent = "Pyodide Ready.";
+            runBtn.disabled = false;
+
+            runBtn.onclick = async () => {
+                const result = await pyodideWorker.runPython("2 + 2");
+                output.textContent = `Result: ${result}`;
+            };
+        }
+
+        init().catch(err => {
+            status.textContent = "Error: " + err.message;
+            console.error(err);
+        });
+    </script>
+</body>
+</html>

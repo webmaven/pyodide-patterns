@@ -10,8 +10,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.11"]
+        include:
+          - python-version: "3.13"
+            pyodide-version: "0.28.0"
+          - python-version: "3.12"
+            pyodide-version: "0.27.0"
+          - python-version: "3.12"
+            pyodide-version: "0.26.0"
 
     steps:
     - uses: actions/checkout@v4
@@ -39,8 +46,8 @@ jobs:
         python -m build _my_local_package
 
     - name: Run Tests
-      # Increase timeout to account for slower CI environments
-      run: hatch run test
+      # Pass the pyodide-version flag to pytest via hatch
+      run: hatch run test --pyodide-version ${{ matrix.pyodide-version }}
 
     - name: Run Isolated Tests
       run: hatch run test-isolated

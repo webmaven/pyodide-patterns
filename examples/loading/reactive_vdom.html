@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pure Python Virtual DOM</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+    <style>
+        .card { border: 1px solid #ddd; padding: 20px; border-radius: 8px; max-width: 400px; }
+        button { margin-right: 5px; cursor: pointer; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Pure Python Virtual DOM</h1>
+    <p>The VDOM engine, component logic, and diffing are all written in 100% Python. No JS library used.</p>
+
+    <div id="vdom-root">
+        <p>Loading Python VDOM Controller...</p>
+    </div>
+
+    <script src="../js/pyodide_loader.js"></script>
+    <script>
+        async function init() {
+            const pyodide = await loadPyodideAndFiles(['reactive_vdom.py']);
+            await pyodide.runPythonAsync("from pyodide_app import reactive_vdom");
+        }
+        init();
+    </script>
+</body>
+</html>
