@@ -9,7 +9,9 @@ const PROJECT_ROOT = LOADER_URL.href.replace(/examples\/js\/pyodide_loader\.js$/
 window.loadPyodideAndFiles = async (files = []) => {
     console.log(`Loader: Initializing from ${PROJECT_ROOT}`);
     
-    const pyodide = await loadPyodide();
+    if (!window.crossOriginIsolated) {
+        console.warn("Loader: Page is NOT cross-origin isolated. High-performance features (SAB, Threads) will fail.");
+    }
     
     try { pyodide.FS.mkdir('pyodide_app'); } catch(e) {}
     pyodide.FS.writeFile('pyodide_app/__init__.py', '');

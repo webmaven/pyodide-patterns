@@ -45,6 +45,12 @@
 <header>
     <h1>Pyodide Architecture</h1>
     <p>Engineering Blueprints for Browser-Native Python Applications</p>
+    
+    <!-- Status Dashboard -->
+    <div id="status-dashboard" style="margin-top: 20px; font-size: 0.8em; display: inline-flex; gap: 10px; justify-content: center; width: 100%;">
+        <span id="sw-status" style="background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.3);">SW: Checking...</span>
+        <span id="iso-status" style="background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.3);">Isolation: Checking...</span>
+    </div>
 </header>
 
 <div class="container">
@@ -250,14 +256,53 @@
 </footer>
 
 <script>
+    const swStatusEl = document.getElementById('sw-status');
+    const isoStatusEl = document.getElementById('iso-status');
+
+    function updateStatus() {
+        const isIsolated = window.crossOriginIsolated;
+        isoStatusEl.textContent = isIsolated ? "Isolation: Active ✅" : "Isolation: INACTIVE ❌";
+        isoStatusEl.style.borderColor = isIsolated ? "#4caf50" : "#f44336";
+        
+        if (navigator.serviceWorker.controller) {
+            swStatusEl.textContent = "SW: Controlling Page 🛡️";
+            swStatusEl.style.borderColor = "#4caf50";
+        } else {
+            swStatusEl.textContent = "SW: Registering... ⏳";
+        }
+    }
+
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("coop-coep-sw.js").then(reg => {
-            // Only reload if the page isn't isolated yet and the SW has taken control
-            if (!window.crossOriginIsolated && navigator.serviceWorker.controller) {
-                console.log("Applying isolation headers via reload...");
+            updateStatus();
+            
+            // If the page isn't isolated yet, we need a refresh to 
+            // let the Service Worker intercept the next document request.
+            // We wait until the SW is actually controlling the page.
+            reg.addEventListener("updatefound", () => {
+                const newWorker = reg.installing;
+                newWorker.addEventListener("statechange", () => {
+                    if (newWorker.state === "activated" && !window.crossOriginIsolated) {
+                        console.log("New SW activated. Reloading for isolation...");
+                        window.location.reload();
+                    }
+                });
+            });
+        });
+
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+            updateStatus();
+            if (!window.crossOriginIsolated) {
+                console.log("SW controller changed. Reloading...");
                 window.location.reload();
             }
         });
+    }
+    
+    updateStatus();
+    // Final fallback: if SW is active but page isn't isolated, force one reload
+    if (navigator.serviceWorker.controller && !window.crossOriginIsolated) {
+        setTimeout(() => { if (!window.crossOriginIsolated) window.location.reload(); }, 1000);
     }
 </script>
 </body>
