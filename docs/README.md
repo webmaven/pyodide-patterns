@@ -9,6 +9,7 @@ This directory contains narrative documentation for the patterns implemented in 
 *   [Console Log Capturing](./console-log-capturing.md) - How to intercept and assert against browser logs.
 *   [Synchronous-Looking Async UI](./python-ui-offloading.md) - Writing 100% Python UIs that offload work to background threads.
 *   [Reactive UI Patterns](./reactive-ui.md) - Three ways to sync Python state with the DOM (Observer, VDOM, Signals).
+*   [Deployment & Security Headers](./deployment-guide.md) - Enabling COOP/COEP on Vercel, Netlify, and GitHub Pages.
 
 ### 2. Testing Patterns
 *   [Unit Testing](./unit-testing.md) - Mocking browser globals for fast logic verification.

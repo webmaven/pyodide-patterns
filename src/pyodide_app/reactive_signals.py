@@ -5,8 +5,8 @@ from pyodide_app.bridge.core import keep_alive
 from pyodide.ffi import create_proxy
 
 # Core Signals
-count: Signal = Signal(0)
-theme: Signal = Signal("light")
+count: Signal[int] = Signal(0)
+theme: Signal[str] = Signal("light")
 
 def setup_signals() -> None:
     # Subscriber 1: Update text

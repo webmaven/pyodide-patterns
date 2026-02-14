@@ -1,27 +1,29 @@
-from typing import Any, Callable, List
+from typing import Any, Callable, Generic, List, TypeVar
+
+T = TypeVar("T")
 
 # --- Reactive Signals ---
 
-class Signal:
+class Signal(Generic[T]):
     """A fine-grained reactive signal."""
-    def __init__(self, value: Any):
-        self._value = value
-        self._subscribers: List[Callable] = []
+    def __init__(self, value: T):
+        self._value: T = value
+        self._subscribers: List[Callable[[T], None]] = []
 
     @property
-    def value(self) -> Any:
+    def value(self) -> T:
         return self._value
 
     @value.setter
-    def value(self, new_value: Any):
+    def value(self, new_value: T):
         self._value = new_value
         self._notify()
 
-    def subscribe(self, callback: Callable):
+    def subscribe(self, callback: Callable[[T], None]) -> None:
         self._subscribers.append(callback)
         callback(self._value)
 
-    def _notify(self):
+    def _notify(self) -> None:
         for cb in self._subscribers:
             cb(self._value)
 
