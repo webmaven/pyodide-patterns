@@ -10,8 +10,10 @@ window.loadPyodideAndFiles = async (files = []) => {
     console.log(`Loader: Initializing from ${PROJECT_ROOT}`);
     
     if (!window.crossOriginIsolated) {
-        console.warn("Loader: Page is NOT cross-origin isolated. High-performance features (SAB, Threads) will fail.");
+        console.error("CRITICAL: Page is NOT cross-origin isolated. This demo WILL fail. Please ensure the Service Worker is active.");
     }
+    
+    const pyodide = await loadPyodide();
     
     try { pyodide.FS.mkdir('pyodide_app'); } catch(e) {}
     pyodide.FS.writeFile('pyodide_app/__init__.py', '');
