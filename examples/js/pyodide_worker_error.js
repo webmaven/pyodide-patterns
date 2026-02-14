@@ -3,7 +3,7 @@ self.importScripts("https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js");
 
 async function runPyodide() {
     try {
-        self.pyodide = await self.loadPyodide();
+        self.pyodide = await self.loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/" });
 
         // Run a Python script that will cause an error
         await self.pyodide.runPythonAsync(`

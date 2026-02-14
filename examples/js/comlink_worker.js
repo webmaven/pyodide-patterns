@@ -3,7 +3,9 @@ importScripts("https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js");
 
 class PyodideWorker {
     async init() {
-        this.pyodide = await loadPyodide();
+        this.pyodide = await loadPyodide({
+            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/"
+        });
         await this.pyodide.loadPackage("micropip");
         this.micropip = this.pyodide.pyimport("micropip");
     }

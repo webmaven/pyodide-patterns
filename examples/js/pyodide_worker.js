@@ -4,7 +4,7 @@ self.importScripts("https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js");
 async function runPyodide() {
     try {
         console.log("Worker: Loading Pyodide...");
-        self.pyodide = await self.loadPyodide();
+        self.pyodide = await self.loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/" });
         console.log("Worker: Pyodide loaded.");
 
         // Run a simple Python script

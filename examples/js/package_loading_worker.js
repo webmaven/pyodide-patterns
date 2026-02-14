@@ -4,7 +4,7 @@ self.importScripts("https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js");
 async function initializePyodide() {
     try {
         postMessage({ type: "status", message: "Loading Pyodide..." });
-        self.pyodide = await self.loadPyodide();
+        self.pyodide = await self.loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/" });
         await self.pyodide.loadPackage("micropip");
         self.micropip = self.pyodide.pyimport("micropip");
         postMessage({ type: "status", message: "Pyodide and micropip ready." });

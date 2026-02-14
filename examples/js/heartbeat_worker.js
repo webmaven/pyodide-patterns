@@ -14,7 +14,7 @@ self.onmessage = async (e) => {
     if (e.data.type === "RUN") {
         try {
             if (!self.pyodide) {
-                self.pyodide = await loadPyodide();
+                self.pyodide = await loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/" });
             }
             const result = await self.pyodide.runPythonAsync(e.data.code);
             self.postMessage({ type: "RESULT", result });

@@ -13,7 +13,7 @@ window.loadPyodideAndFiles = async (files = []) => {
     console.log(`Loader: Project Root detected as: ${PROJECT_ROOT}`);
     const prefix = PROJECT_ROOT + 'src/pyodide_app/';
 
-    const pyodide = await loadPyodide();
+    const pyodide = await loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/" });
     
     // Create package directory
     try { pyodide.FS.mkdir('pyodide_app'); } catch(e) {}
