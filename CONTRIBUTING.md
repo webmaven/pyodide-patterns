@@ -1,47 +1,48 @@
 # Contributing to Pyodide Patterns Cookbook
 
-We welcome contributions to the Pyodide Patterns Cookbook! Whether you're fixing a bug, adding a new pattern, or improving documentation, your help is appreciated.
+We welcome contributions! This project is a curated collection of architectural wisdom for Pyodide developers.
+
+## Engineering Standards
+
+To keep the cookbook high-quality and reliable, we adhere to the following standards:
+
+1.  **Strict Typing**: All Python code in `src/` must be fully type-hinted and pass `mypy`.
+2.  **Linting**: We use `ruff` for linting and formatting.
+3.  **Pre-commit**: Please install the pre-commit hooks before making changes:
+    ```bash
+    pip install pre-commit
+    pre-commit install
+    ```
+4.  **Verified Patterns**: Every new pattern in `docs/patterns/` must be accompanied by a working example in `examples/` and a verification test in `tests/patterns/`.
+
+## Pattern Schema
+
+All narrative patterns must follow this schema:
+*   **Context**: When does this situation arise?
+*   **Problem**: What is the specific challenge?
+*   **Forces**: What are the competing constraints (performance, security, DX)?
+*   **Solution**: The high-level architectural strategy.
+*   **Implementation**: Snippets and links to code.
+*   **Resulting Context**: The new state, trade-offs, and next steps.
 
 ## Getting Started
 
-To get started, you'll need to have Python 3.8+ and [Hatch](https://hatch.pypa.io/latest/) installed.
-
-1.  **Fork and Clone:** Fork the repository on GitHub and clone your fork locally.
-2.  **Install Dependencies:** Navigate to the project directory and install the dependencies using Hatch:
-
+1.  **Environment**:
     ```bash
-    hatch shell
+    python -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    playwright install chromium
+    ```
+2.  **Run Tests**:
+    ```bash
+    pytest tests/patterns
     ```
 
-3.  **Run Tests:** To ensure everything is set up correctly, run the test suite:
+## Creating a Pull Request
 
-    ```bash
-    hatch run test
-    ```
-
-## Making Changes
-
-1.  **Create a Branch:** Create a new branch for your changes:
-
-    ```bash
-    git checkout -b my-new-feature
-    ```
-
-2.  **Make Your Changes:** Make your changes to the code and add or update tests as needed.
-3.  **Run the Linter:** Before committing, run the linter to ensure your code follows the project's style guidelines:
-
-    ```bash
-    hatch run lint
-    ```
-
-4.  **Commit Your Changes:** Commit your changes with a clear and descriptive commit message.
-5.  **Push to Your Fork:** Push your changes to your fork on GitHub.
-6.  **Create a Pull Request:** Open a pull request from your fork to the main repository.
-
-## Reporting Bugs
-
-If you find a bug, please open an issue on GitHub. Include a clear description of the bug, steps to reproduce it, and any relevant error messages.
-
-## Suggesting Enhancements
-
-If you have an idea for a new feature or an improvement to an existing one, please open an issue on GitHub to discuss it.
+1.  Create a branch (`git checkout -b feat/my-pattern`).
+2.  Implement the code, example, and test.
+3.  Write the narrative documentation in `docs/patterns/`.
+4.  Ensure `pre-commit run --all-files` passes.
+5.  Open a PR with a description of the "Forces" your pattern addresses.

@@ -2,86 +2,79 @@
 
 ![Tests](https://github.com/webmaven/pyodide-patterns/actions/workflows/test.yml/badge.svg)
 
-A comprehensive collection of testing, debugging, and architectural patterns for building production-ready Pyodide applications.
+A comprehensive architectural reference and "Cookbook" for building production-ready, Python-native web applications.
 
 ## Overview
 
-This project serves as a "cookbook" and reference implementation for developers working with Pyodide. It consolidates best practices for:
+This project goes beyond simple code snippets to provide a **Narrative Pattern Language** for Pyodide. Each pattern documents the **Forces** (trade-offs), the **Architectural Solution**, and the **Resulting Context** of specific implementations.
 
-*   **Testing**: Robust end-to-end testing with Playwright and Pytest.
-*   **Debugging**: Tactics for diagnosing issues in the browser (console logs, network errors, Web Workers).
-*   **Loading**: Strategies for efficient package loading and error handling, including runtime errors.
-*   **Workers**: Patterns for running Python code in Web Workers, including load failure handling.
+The core philosophy is **Python-Centric Development**: providing the tools to build complex, reactive, and high-performance front-ends without leaving the Python ecosystem.
 
-## Documentation
+## 🏛️ Narrative Pattern Language
 
-For a deep dive into the architectural reasoning behind these patterns, see our [Narrative Pattern Language](docs/README.md).
+For a deep dive into the architectural reasoning behind these implementations, see our [Pattern Index](docs/README.md).
 
-## Project Structure
+### 1. Architectural & UI Patterns
+*   **[Reactive UI (VDOM, Signals, Observer)](docs/patterns/reactive-ui.md)**: Three 100% Python implementations for syncing state to the DOM.
+*   **[Synchronous-Looking Async UI](docs/patterns/python-ui-offloading.md)**: Linear Python logic that offloads heavy work to background threads using `async/await`.
+*   **[Test Suite Isolation](docs/patterns/test-suite-isolation.md)**: Strategies for running Playwright and `pytest-asyncio` without event loop conflicts.
+*   **[Console Log Capturing](docs/patterns/console-log-capturing.md)**: Bridging browser output to Python test reports.
 
-The project is organized into "patterns", each demonstrating a specific concept or solution.
+### 2. High Performance & Workers
+*   **[Worker Pool](docs/patterns/worker-pool.md)**: Scaling Pyodide across multiple CPU cores with task queuing.
+*   **[Shared Memory (SAB)](docs/patterns/shared-memory.md)**: True zero-copy coordination between JS, Python, and the GPU.
+*   **[WebGPU Compute](docs/patterns/webgpu-compute.md)**: Direct GPU acceleration for NumPy-based workloads.
+*   **[Worker RPC (Comlink)](docs/patterns/worker-rpc.md)**: Object-oriented communication between main and worker threads.
 
-```
-pyodide-patterns/
-├── src/                    # Python package source
-├── tests/
-│   └── patterns/           # The core content
-│       ├── debugging/      # Debugging scenarios (race conditions, etc.)
-│       ├── loading/        # Package loading and error handling
-│       ├── workers/        # Web Worker patterns
-│       └── testing/        # General testing patterns
-└── examples/               # HTML/JS examples for the tests
-```
+### 3. Loading & Persistence
+*   **[Persistent File System (IDBFS)](docs/patterns/persistence.md)**: Mounting IndexedDB so Python file I/O survives page reloads.
+*   **[Bootstrapping & Warm Starts](docs/patterns/bootstrapping.md)**: Optimizing perceived performance via background loading.
+*   **[Service Worker Caching](docs/patterns/service-worker-caching.md)**: Local caching of the Pyodide runtime and Python wheels.
+*   **[Worker Load Failure](docs/patterns/worker-load-failure.md)**: Robust detection of network and CORS issues in workers.
 
-## Getting Started
+## 🛠️ The Unified Python Bridge
 
-### Prerequisites
+All patterns leverage `src/pyodide_app/bridge.py`, a unified utility module that provides:
+*   **`Signal`**: Fine-grained reactivity.
+*   **`@observable`**: Dataclass-based state management.
+*   **`PythonVDOM`**: A pure Python Virtual DOM engine.
+*   **`keep_alive`**: Automatic proxy lifecycle management to prevent GC memory leaks.
 
-*   Python 3.8+
-*   [Hatch](https://hatch.pypa.io/latest/) (recommended for project management)
+## 🚀 Getting Started
 
 ### Installation
 
-1.  Clone the repository.
-2.  Install dependencies and run tests using Hatch:
-
 ```bash
-hatch build
-cd _my_local_package && hatch build && cd ..
-hatch run test
+# Clone and setup environment
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+playwright install chromium
+
+# Build required wheels
+python -m pip install build
+python -m build
+python -m build _my_local_package
 ```
 
-Or manually with pip:
+### Running Tests
+
+We use a comprehensive test suite that mirrors the pattern structure:
 
 ```bash
-pip install pytest pytest-playwright pytest-asyncio
-playwright install
-pytest
+# Run all verified patterns
+pytest tests/patterns
+
+# Run specific category
+pytest tests/patterns/architectural
 ```
 
-## Patterns
+## ✨ Engineering Standards
 
-### 1. Testing Patterns
-*   **End-to-End Testing**: How to test full user flows in the browser.
-*   **Functional Testing**: How to verify specific features.
-*   **Test Suite Isolation**: How to resolve event loop conflicts between `pytest-asyncio` and `pytest-playwright` (inspired by the Imposition project).
-
-### 2. Debugging Patterns
-*   **Race Conditions**: How to identify and fix async race conditions in tests.
-*   **Console Logs**: How to capture and assert against browser console logs.
-*   **Network Failures**: How to simulate and test network errors (e.g., 404s).
-
-### 3. Worker Patterns
-*   **Basic Worker**: Running Pyodide in a web worker.
-*   **Advanced Worker**: Handling errors and package loading inside workers.
-*   **Data Cloning**: Understanding limitations of data transfer between main thread and workers.
-*   **Load Failure**: Documenting the difficulty of reliably capturing worker script load failures.
-
-### 4. Loading Patterns
-*   **Package Loading**: Strategies for loading packages via `micropip`.
-*   **Error Handling**: Gracefully handling load failures and runtime errors.
-*   **Runtime Error**: Demonstrates handling of Python runtime errors within Pyodide.
+*   **100% Typed**: All source files use strict Python type hinting verified by `mypy`.
+*   **Linted & Formatted**: Enforcement via `ruff` and `pre-commit` hooks.
+*   **CI/CD Matrix**: Every pattern is tested against Pyodide versions 0.26, 0.27, and 0.28.
 
 ## Contributing
 
-Contributions are welcome! If you have a new pattern or recipe, please see our [contributing guide](CONTRIBUTING.md) for more details.
+Contributions are welcome! If you have a new architectural pattern for Pyodide, please see our [contributing guide](CONTRIBUTING.md).
