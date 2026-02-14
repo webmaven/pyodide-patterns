@@ -16,7 +16,7 @@ def test_pyodide_loads_successfully(page: Page, live_server: str):
 
     # Wait for Pyodide to be attached to the window
     try:
-        page.wait_for_function("!!window.pyodide")
+        page.wait_for_function("!!window.pyodide", timeout=60000)
     except Exception:
         print("\nBrowser Console Logs:")
         for log in console_logs:

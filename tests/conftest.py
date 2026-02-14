@@ -103,8 +103,9 @@ def live_server(pyodide_version: str) -> Generator[str, None, None]:
     original_index_html_path = project_root / "index.html"
 
     # Read and modify the index.html content in memory
-    pattern = re.compile(r"https://cdn.jsdelivr.net/pyodide/v[^/]+/full/pyodide.js")
-    new_url = f"https://cdn.jsdelivr.net/pyodide/v{pyodide_version}/full/pyodide.js"
+    # Matches both script src and indexURL strings
+    pattern = re.compile(r"https://cdn.jsdelivr.net/pyodide/v[^/]+/full/(pyodide\.js|)")
+    new_url_base = f"https://cdn.jsdelivr.net/pyodide/v{pyodide_version}/full/"
 
     if not original_index_html_path.exists():
         pytest.fail(f"index.html not found at {original_index_html_path}")
@@ -130,7 +131,7 @@ def live_server(pyodide_version: str) -> Generator[str, None, None]:
             
             content = full_path.read_text(encoding="utf-8")
             if pattern.search(content):
-                return pattern.sub(new_url, content).encode("utf-8")
+                return pattern.sub(lambda m: new_url_base + m.group(1), content).encode("utf-8")
             return content.encode("utf-8")
 
         def do_GET(self):  # noqa: N802

@@ -9,10 +9,10 @@ class FSExplorer:
         self.root_el = js.document.getElementById(root_id)
         self.refresh()
 
-    def get_tree(self, path: str = "/home") -> Dict:
+    def get_tree(self, path: str = "/home") -> Dict[str, Any]:
         """Walk the VFS and return a nested dictionary."""
-        name = os.path.basename(path) or path
-        node = {"name": name, "path": path, "type": "dir", "children": []}
+        name: str = os.path.basename(path) or path
+        node: Dict[str, Any] = {"name": name, "path": path, "type": "dir", "children": []}
         
         try:
             # Skip massive system directories for this pattern's safety
@@ -33,11 +33,11 @@ class FSExplorer:
                         "size": os.path.getsize(full_path)
                     })
         except Exception as e:
-            node["name"] += f" (Error: {e})"
+            node["name"] = str(node["name"]) + f" (Error: {e})"
             
         return node
 
-    def render_node(self, node: Dict) -> Any:
+    def render_node(self, node: Dict[str, Any]) -> Any:
         li = js.document.createElement("li")
         li.className = f"fs-node {node['type']}"
         

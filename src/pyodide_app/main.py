@@ -16,7 +16,10 @@ from . import utils
 def change_heading_text(new_text: str) -> None:
     """Changes the text of the H1 element with id 'title'."""
     title_element = document.getElementById("title")
-    title_element.innerText = new_text
+    if title_element:
+        title_element.innerText = new_text
+    else:
+        print(f"Warning: Element with id 'title' not found. Text: {new_text}")
 
 
 def add(a: int, b: int) -> int:
