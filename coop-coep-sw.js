@@ -1,10 +1,6 @@
 /*
  * COOP/COEP Service Worker Workaround for GitHub Pages
  * Derived from: https://github.com/gzuidhof/coi-serviceworker
- * 
- * This service worker intercepts fetches and injects the COOP/COEP headers
- * into the response, enabling SharedArrayBuffer on platforms that don't
- * allow setting custom HTTP headers.
  */
 
 if (typeof window === "undefined") {
@@ -12,8 +8,14 @@ if (typeof window === "undefined") {
     self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
     self.addEventListener("fetch", (event) => {
-        // Only intercept requests to our own origin to avoid breaking external CDNs
-        if (new URL(event.request.url).origin !== self.location.origin) {
+        const requestUrl = new URL(event.request.url);
+        
+        // Only intercept requests to our own origin or those within our project path
+        // On GitHub Pages, the origin is https://webmaven.github.io
+        // but the path is /pyodide-patterns/
+        const isSameOrigin = requestUrl.origin === self.location.origin;
+        
+        if (!isSameOrigin) {
             return;
         }
 
@@ -29,12 +31,8 @@ if (typeof window === "undefined") {
                     }
 
                     const newHeaders = new Headers(response.headers);
-                    // Standard COOP/COEP
                     newHeaders.set("Cross-Origin-Embedder-Policy", "require-corp");
                     newHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
-                    
-                    // CRITICAL: Also set Cross-Origin-Resource-Policy so that the 
-                    // browser allows these resources to be loaded in an isolated environment.
                     newHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
 
                     return new Response(response.body, {
@@ -43,7 +41,7 @@ if (typeof window === "undefined") {
                         headers: newHeaders,
                     });
                 })
-                .catch((e) => console.error(e))
+                .catch((e) => console.error("SW Fetch Error:", e))
         );
     });
 }
