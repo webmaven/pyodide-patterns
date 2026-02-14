@@ -276,14 +276,24 @@
         navigator.serviceWorker.register("coop-coep-sw.js").then(reg => {
             updateStatus();
             
-            // If the page isn't isolated yet, we need a refresh to 
-            // let the Service Worker intercept the next document request.
-            // We wait until the SW is actually controlling the page.
+            // HARD RELOAD RECOVERY:
+            // If the SW is active but not controlling the page (null controller), 
+            // or if we aren't isolated, we trigger one reload to let the SW 
+            // intercept the request and inject headers.
+            const isHardReload = !navigator.serviceWorker.controller && reg.active;
+            const needsIsolation = !window.crossOriginIsolated;
+
+            if ((isHardReload || needsIsolation) && !window.location.search.includes('reloaded=true')) {
+                console.log("Environment check failed. Re-establishing isolation shield...");
+                const url = new URL(window.location.href);
+                url.searchParams.set('reloaded', 'true');
+                window.location.href = url.href;
+            }
+
             reg.addEventListener("updatefound", () => {
                 const newWorker = reg.installing;
                 newWorker.addEventListener("statechange", () => {
                     if (newWorker.state === "activated" && !window.crossOriginIsolated) {
-                        console.log("New SW activated. Reloading for isolation...");
                         window.location.reload();
                     }
                 });
@@ -292,18 +302,11 @@
 
         navigator.serviceWorker.addEventListener("controllerchange", () => {
             updateStatus();
-            if (!window.crossOriginIsolated) {
-                console.log("SW controller changed. Reloading...");
-                window.location.reload();
-            }
+            if (!window.crossOriginIsolated) window.location.reload();
         });
     }
     
     updateStatus();
-    // Final fallback: if SW is active but page isn't isolated, force one reload
-    if (navigator.serviceWorker.controller && !window.crossOriginIsolated) {
-        setTimeout(() => { if (!window.crossOriginIsolated) window.location.reload(); }, 1000);
-    }
 </script>
 </body>
 </html>
