@@ -116,11 +116,9 @@ def live_server(pyodide_version: str) -> Generator[str, None, None]:
             f"WARNING: Could not find Pyodide CDN URL in "
             f"{original_index_html_path} to replace."
         )
-        modified_content_bytes = original_content.encode("utf-8")
     else:
-        modified_content_bytes = pattern.sub(
-            lambda m: new_url_base + m.group(1), original_content
-        ).encode("utf-8")
+        # Perform initial replacement for global state if needed
+        pattern.sub(lambda m: new_url_base + m.group(1), original_content)
 
     class PyodideHandler(CorsHandler):
         def __init__(self, *args, **kwargs):
@@ -130,10 +128,12 @@ def live_server(pyodide_version: str) -> Generator[str, None, None]:
             full_path = project_root / path.lstrip("/")
             if not full_path.exists() or not full_path.is_file():
                 return None
-            
+
             content = full_path.read_text(encoding="utf-8")
             if pattern.search(content):
-                return pattern.sub(lambda m: new_url_base + m.group(1), content).encode("utf-8")
+                return pattern.sub(lambda m: new_url_base + m.group(1), content).encode(
+                    "utf-8"
+                )
             return content.encode("utf-8")
 
         def do_GET(self):  # noqa: N802

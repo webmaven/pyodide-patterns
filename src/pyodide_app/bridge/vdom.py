@@ -1,4 +1,5 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Union
+
 from .core import IS_EMSCRIPTEN, keep_alive
 
 if IS_EMSCRIPTEN:
@@ -6,31 +7,40 @@ if IS_EMSCRIPTEN:
     from pyodide.ffi import create_proxy
 else:
     from unittest.mock import MagicMock
+
     js = MagicMock()
+
     def create_proxy(obj: Any) -> Any:
-        return obj # Return original object in CPython for logic testing
+        return obj  # Return original object in CPython for logic testing
 
 # --- Virtual DOM Engine ---
 
-def h(tag: str, props: Optional[Dict[str, Any]] = None, children: Any = None) -> Dict[str, Any]:
+
+def h(
+    tag: str, props: Optional[Dict[str, Any]] = None, children: Any = None
+) -> Dict[str, Any]:
     """Hyperscript helper for Virtual Nodes."""
     return {
-        "tag": tag, 
-        "props": props or {}, 
-        "children": children if isinstance(children, list) else ([children] if children else [])
+        "tag": tag,
+        "props": props or {},
+        "children": children
+        if isinstance(children, list)
+        else ([children] if children else []),
     }
+
 
 class PythonVDOM:
     """A minimal Pure Python Virtual DOM engine."""
+
     def __init__(self, container_id: str) -> None:
         self.container = js.document.getElementById(container_id)
 
     def _create_element(self, vnode: Union[Dict[str, Any], str]) -> Any:
         if isinstance(vnode, str):
             return js.document.createTextNode(vnode)
-        
+
         el = js.document.createElement(vnode["tag"])
-        
+
         for name, value in vnode["props"].items():
             if name.startswith("on"):
                 # Automatically wrap event handlers in proxies if they aren't already
@@ -41,7 +51,7 @@ class PythonVDOM:
                 el.addEventListener(name[2:], callback)
             else:
                 el.setAttribute(name, str(value))
-        
+
         for child in vnode["children"]:
             el.appendChild(self._create_element(child))
         return el

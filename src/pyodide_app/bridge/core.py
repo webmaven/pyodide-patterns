@@ -8,6 +8,7 @@ IS_EMSCRIPTEN = sys.platform == "emscripten"
 
 _GLOBAL_PROXIES: List[Any] = []
 
+
 def keep_alive(proxy: Any) -> Any:
     """
     Prevents a PyProxy from being garbage collected by storing it in a global list.

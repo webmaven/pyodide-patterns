@@ -1,20 +1,22 @@
-import js
-import sys
-import io
 import asyncio
+import sys
 from typing import Any
-from pyodide_app.bridge.core import keep_alive
+
+import js
 from pyodide.ffi import create_proxy
+
+from pyodide_app.bridge.core import keep_alive
+
 
 class VirtualTerminal:
     def __init__(self, output_id: str, input_id: str):
         self.output_el = js.document.getElementById(output_id)
         self.input_el = js.document.getElementById(input_id)
-        
+
         # Redirect stdout/stderr to this terminal
         sys.stdout = self
         sys.stderr = self
-        
+
         self.setup_ui()
 
     def write(self, text: str) -> None:
@@ -33,7 +35,7 @@ class VirtualTerminal:
         if event.key == "Enter":
             command = self.input_el.value
             self.input_el.value = ""
-            
+
             print(f">>> {command}")
             try:
                 # Use pyodide.eval_code or eval for simple expressions
@@ -42,21 +44,25 @@ class VirtualTerminal:
                     self.output_el.innerHTML = ""
                 else:
                     # In a real terminal, you'd use a more robust eval loop
-                    result = eval(command, js.pyodide_globals)
+                    result = eval(command, js.pyodide_globals)  # noqa: S307
                     if result is not None:
                         print(str(result))
             except Exception as e:
                 print(f"Error: {e}")
 
     def setup_ui(self) -> None:
-        proxy = keep_alive(create_proxy(lambda e: asyncio.ensure_future(self.handle_input(e))))
+        proxy = keep_alive(
+            create_proxy(lambda e: asyncio.ensure_future(self.handle_input(e)))
+        )
         self.input_el.addEventListener("keydown", proxy)
         print("Python Virtual Terminal Ready.")
         print("Type a Python expression (e.g. 2+2) or 'clear'.")
 
+
 def init_terminal() -> None:
     # We pass the globals so eval() can access them
     js.pyodide_globals = globals()
-    term = VirtualTerminal("term-output", "term-input")
+    VirtualTerminal("term-output", "term-input")
+
 
 init_terminal()

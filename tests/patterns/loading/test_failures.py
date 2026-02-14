@@ -82,7 +82,7 @@ def test_micropip_fails_to_install_package(page: Page, live_server: str):
     # Different versions of Pyodide/micropip may return different error messages
     possible_errors = [
         "ValueError: Can't fetch metadata",
-        "ValueError: Unsupported content type"
+        "ValueError: Unsupported content type",
     ]
     assert any(error in log_text for error in possible_errors), (
         f"Expected one of {possible_errors} in console logs, but got: {log_text}"

@@ -1,5 +1,5 @@
-import timeit
 import sys
+import timeit
 
 # Environment detection
 IS_EMSCRIPTEN = sys.platform == "emscripten"
@@ -8,9 +8,10 @@ if IS_EMSCRIPTEN:
     from js import document
 else:
     from unittest.mock import MagicMock
+
     document = MagicMock()
 
-from . import utils
+from . import utils  # noqa: E402
 
 
 def change_heading_text(new_text: str) -> None:
