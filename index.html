@@ -1,64 +1,159 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-  <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pyodide Architecture Gallery</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #333;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; padding: 0; }
+        header { background: var(--primary); color: white; padding: 60px 20px; text-align: center; }
+        header h1 { margin: 0; font-size: 2.5em; font-weight: 300; }
+        header p { margin: 10px 0 0; font-style: italic; opacity: 0.8; }
+        
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        
+        .section-title { border-bottom: 2px solid var(--accent); display: inline-block; margin-bottom: 25px; color: var(--primary); }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 50px; }
+        
+        .card { background: var(--card-bg); border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 25px; transition: transform 0.2s; border-left: 4px solid var(--accent); display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-50px); }
+        .card h3 { margin-top: 0; color: var(--primary); }
+        .card p { font-size: 0.9em; color: #666; flex-grow: 1; }
+        .card .links { margin-top: 15px; display: flex; gap: 15px; font-size: 0.85em; font-weight: bold; }
+        .card a { color: var(--accent); text-decoration: none; }
+        .card a:hover { text-decoration: underline; }
+        
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.7em; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
+        .badge-arch { background: #e1f5fe; color: #01579b; }
+        .badge-worker { background: #ede7f6; color: #311b92; }
+        .badge-loading { background: #e8f5e9; color: #1b5e20; }
+        .badge-iso { background: #fff3e0; color: #e65100; border: 1px solid #ffccbc; }
+
+        footer { text-align: center; padding: 40px; color: #999; font-size: 0.8em; }
+    </style>
 </head>
-
 <body>
-  <h1 id="title">Hello, Pyodide!</h1>
-  <input type="text" id="name" placeholder="Enter your name" />
-  <button id="greet-button">Greet</button>
-  <button id="benchmark-button">Benchmark</button>
 
-  <script type="text/javascript">
-    async function main() {
-      // Dynamically get the pyodide version from the script tag
-      const pyodideScript = document.querySelector('script[src*="pyodide.js"]');
-      const pyodideVersion = pyodideScript.src.match(/v([0-9.]+)/)[1];
+<header>
+    <h1>Pyodide Architecture</h1>
+    <p>Engineering Blueprints for Browser-Native Python Applications</p>
+</header>
 
-      let pyodide = await loadPyodide({
-        indexURL: `https://cdn.jsdelivr.net/pyodide/v${pyodideVersion}/full/`,
-      });
-      window.pyodide = pyodide;
-      console.log("Pyodide attached to window:", window.pyodide);
+<div class="container">
+    
+    <h2 class="section-title">Architectural & UI Patterns</h2>
+    <div class="grid">
+        <div class="card">
+            <span class="badge badge-arch">Reactive UI</span>
+            <h3>Reactivity: VDOM, Signals, Observer</h3>
+            <p>Three native Python strategies for syncing data state with the browser DOM without JavaScript.</p>
+            <div class="links">
+                <a href="examples/loading/reactive_signals.html">Live Demo</a>
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/reactive-ui.md">Docs</a>
+            </div>
+        </div>
+        <div class="card">
+            <span class="badge badge-arch">UX Logic</span>
+            <h3>Virtual Terminal & FS Explorer</h3>
+            <p>Components for capturing Python stdout/stderr and navigating the virtual filesystem.</p>
+            <div class="links">
+                <a href="examples/loading/virtual_terminal.html">Terminal</a>
+                <a href="examples/loading/vfs_explorer.html">Explorer</a>
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/virtual-terminal.md">Docs</a>
+            </div>
+        </div>
+        <div class="card">
+            <span class="badge badge-arch">Control Flow</span>
+            <h3>UI Offloading (Sync-Async)</h3>
+            <p>Writing linear Python UI code that offloads heavy tasks to workers via an async bridge.</p>
+            <div class="links">
+                <a href="examples/loading/python_ui_offloading.html">Live Demo</a>
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/python-ui-offloading.md">Docs</a>
+            </div>
+        </div>
+    </div>
 
-      // Install the pyodide_app package
-      await pyodide.loadPackage("micropip");
-      const micropip = pyodide.pyimport("micropip");
-      await micropip.install("/dist/pyodide_patterns-0.1.0-py3-none-any.whl");
+    <h2 class="section-title">Web Worker & Performance Patterns</h2>
+    <div class="grid">
+        <div class="card">
+            <span class="badge badge-worker">Reliability</span>
+            <h3>Worker Heartbeat & Handshake</h3>
+            <p>Robust detection of silent crashes and infinite loops in background threads.</p>
+            <div class="links">
+                <a href="examples/loading/worker_heartbeat.html">Live Demo</a>
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/worker-heartbeat.md">Docs</a>
+            </div>
+        </div>
+        <div class="card">
+            <span class="badge badge-worker">Throughput</span>
+            <h3>Worker Pool & RPC</h3>
+            <p>Scaling Python execution across multiple CPU cores with task queuing and Comlink.</p>
+            <div class="links">
+                <a href="examples/workers/worker_pool.html">Live Demo</a>
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/worker-pool.md">Docs</a>
+            </div>
+        </div>
+        <div class="card">
+            <span class="badge badge-worker badge-iso">Isolated Environment</span>
+            <h3>Shared Memory (SAB) & WebGPU</h3>
+            <p>Zero-copy data sharing between Python and GPU hardware using SharedArrayBuffer.</p>
+            <div class="links">
+                <a href="examples/loading/shared_memory_gpu.html">SAB Demo</a>
+                <a href="examples/loading/webgpu_compute.html">GPU Demo</a>
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/shared-memory.md">Docs</a>
+            </div>
+        </div>
+    </div>
 
-      // Import and run the main function
-      pyodide.runPython(`
-          from pyodide_app.main import run, greet, benchmark_add
-          run()
+    <h2 class="section-title">Loading & Persistence Patterns</h2>
+    <div class="grid">
+        <div class="card">
+            <span class="badge badge-loading">Optimization</span>
+            <h3>Bootstrapping & SW Caching</h3>
+            <p>Techniques for progressive loading and local caching of the Pyodide runtime.</p>
+            <div class="links">
+                <a href="examples/loading/progressive_bootstrapping.html">Live Demo</a>
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/bootstrapping.md">Docs</a>
+            </div>
+        </div>
+        <div class="card">
+            <span class="badge badge-loading">Data</span>
+            <h3>Persistent FS (IDBFS)</h3>
+            <p>Mounting IndexedDB so standard Python file I/O survives page reloads.</p>
+            <div class="links">
+                <a href="examples/loading/persistence.html">Live Demo</a>
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/persistence.md">Docs</a>
+            </div>
+        </div>
+    </div>
 
-          # Expose a Python function to JavaScript
-          from js import document
+</div>
 
-          def greet_js_proxy(name):
-              greet(name)
+<footer>
+    &copy; 2026 Pyodide Architecture Project | Engineering Blueprints for the Browser
+</footer>
 
-          def benchmark_js_proxy():
-              benchmark_add()
-        `);
-
-      // Get the Python functions
-      const greet_from_python = pyodide.globals.get('greet_js_proxy');
-      const benchmark_from_python = pyodide.globals.get('benchmark_js_proxy');
-
-      // Set up the event listeners
-      document.getElementById("greet-button").onclick = () => {
-        let name = document.getElementById("name").value;
-        greet_from_python(name);
-      };
-
-      document.getElementById("benchmark-button").onclick = () => {
-        benchmark_from_python();
-      };
+<script>
+    // Register the COOP/COEP Service Worker to enable SAB on GitHub Pages
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("coop-coep-sw.js").then(reg => {
+            console.log("Service Worker registered for COOP/COEP scope.");
+            reg.addEventListener("updatefound", () => {
+                if (navigator.serviceWorker.controller) {
+                    console.log("New SW version found, reloading...");
+                    window.location.reload();
+                }
+            });
+        });
     }
-    main();
-  </script>
+</script>
 </body>
-
 </html>
