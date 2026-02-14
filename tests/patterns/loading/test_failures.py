@@ -79,7 +79,14 @@ def test_micropip_fails_to_install_package(page: Page, live_server: str):
 
     # Check the console for the specific Python error message
     log_text = "".join(console_messages)
-    assert "ValueError: Can't fetch metadata" in log_text
+    # Different versions of Pyodide/micropip may return different error messages
+    possible_errors = [
+        "ValueError: Can't fetch metadata",
+        "ValueError: Unsupported content type"
+    ]
+    assert any(error in log_text for error in possible_errors), (
+        f"Expected one of {possible_errors} in console logs, but got: {log_text}"
+    )
 
 
 def test_python_runtime_error(page: Page, live_server: str):

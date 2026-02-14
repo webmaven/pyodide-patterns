@@ -118,7 +118,9 @@ def live_server(pyodide_version: str) -> Generator[str, None, None]:
         )
         modified_content_bytes = original_content.encode("utf-8")
     else:
-        modified_content_bytes = pattern.sub(new_url, original_content).encode("utf-8")
+        modified_content_bytes = pattern.sub(
+            lambda m: new_url_base + m.group(1), original_content
+        ).encode("utf-8")
 
     class PyodideHandler(CorsHandler):
         def __init__(self, *args, **kwargs):
