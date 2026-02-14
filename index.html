@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="examples/js/sw_registration.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pyodide Architecture Gallery</title>
@@ -273,37 +274,9 @@
     }
 
     if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("coop-coep-sw.js").then(reg => {
-            updateStatus();
-            
-            // HARD RELOAD RECOVERY:
-            // If the SW is active but not controlling the page (null controller), 
-            // or if we aren't isolated, we trigger one reload to let the SW 
-            // intercept the request and inject headers.
-            const isHardReload = !navigator.serviceWorker.controller && reg.active;
-            const needsIsolation = !window.crossOriginIsolated;
-
-            if ((isHardReload || needsIsolation) && !window.location.search.includes('reloaded=true')) {
-                console.log("Environment check failed. Re-establishing isolation shield...");
-                const url = new URL(window.location.href);
-                url.searchParams.set('reloaded', 'true');
-                window.location.href = url.href;
-            }
-
-            reg.addEventListener("updatefound", () => {
-                const newWorker = reg.installing;
-                newWorker.addEventListener("statechange", () => {
-                    if (newWorker.state === "activated" && !window.crossOriginIsolated) {
-                        window.location.reload();
-                    }
-                });
-            });
-        });
-
-        navigator.serviceWorker.addEventListener("controllerchange", () => {
-            updateStatus();
-            if (!window.crossOriginIsolated) window.location.reload();
-        });
+        // Status updates only - actual registration is handled by the guard script in head
+        navigator.serviceWorker.ready.then(updateStatus);
+        navigator.serviceWorker.addEventListener("controllerchange", updateStatus);
     }
     
     updateStatus();

@@ -1,19 +1,23 @@
 /**
- * COOP/COEP Service Worker Registration Guard
+ * Pyodide Architecture - Isolation Guard
  * Ensures the page is Cross-Origin Isolated before Pyodide runs.
  */
 (function() {
-    // Path to the service worker at the project root
-    const swPath = window.location.pathname.includes('/examples/') 
-        ? '../../coop-coep-sw.js' 
-        : 'coop-coep-sw.js';
+    // Calculate path to root SW
+    const depth = (window.location.pathname.match(/\//g) || []).length;
+    // For repo at /pyodide-patterns/, depth 1 is root, depth 2 is examples/
+    const isRoot = !window.location.pathname.includes('/examples/');
+    const swPath = isRoot ? './coop-coep-sw.js' : '../../coop-coep-sw.js';
 
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register(swPath).then(reg => {
-            // If the page isn't isolated yet, we need a refresh to 
-            // let the Service Worker intercept the next document request.
-            if (!window.crossOriginIsolated && !window.location.search.includes('sw-fixed=true')) {
-                console.log("Page is not isolated. Reloading to apply SW headers...");
+            // Check if we need to reload to enable isolation.
+            // We only reload if:
+            // 1. We aren't isolated yet.
+            // 2. The SW is ready (active).
+            // 3. We haven't already reloaded (to prevent loops).
+            if (!window.crossOriginIsolated && reg.active && !window.location.search.includes('sw-fixed=true')) {
+                console.log("Isolation Guard: Re-establishing shield...");
                 const url = new URL(window.location.href);
                 url.searchParams.set('sw-fixed', 'true');
                 window.location.href = url.href;
