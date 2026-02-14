@@ -1,12 +1,7 @@
-import sys
 from unittest.mock import MagicMock, patch
 
-# Mock the 'js' module *before* importing the app code
-# This is a key pattern for unit testing Pyodide code outside the browser
-sys.modules["js"] = MagicMock()
-
-# Now we can import the app code
-from pyodide_app.main import add, change_heading_text  # noqa: E402
+# Now we can import the app code directly
+from pyodide_app.main import add, change_heading_text
 
 
 def test_add():

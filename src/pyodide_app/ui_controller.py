@@ -1,7 +1,16 @@
-import js
+import sys
 import asyncio
 from typing import Any
-from pyodide.ffi import create_proxy
+from pyodide_app.bridge.core import IS_EMSCRIPTEN
+
+if IS_EMSCRIPTEN:
+    import js
+    from pyodide.ffi import create_proxy
+else:
+    from unittest.mock import MagicMock
+    js = MagicMock()
+    def create_proxy(obj: Any) -> Any:
+        return obj
 
 async def handle_click(event: Any) -> None:
     button = js.document.getElementById("process-btn")

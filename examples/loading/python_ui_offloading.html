@@ -15,6 +15,7 @@
         <p>Result: <strong id="ui-output">None</strong></p>
     </div>
 
+    <script src="../js/pyodide_loader.js"></script>
     <script>
         async function init() {
             const status = document.getElementById('ui-status');
@@ -24,14 +25,12 @@
             window.worker_bridge = Comlink.wrap(worker);
             await window.worker_bridge.init();
 
-            // 2. Setup the Main Thread Pyodide
-            const pyodide = await loadPyodide();
+            // 2. Setup the Main Thread Pyodide and load files into package
+            const pyodide = await loadPyodideAndFiles(['ui_controller.py']);
             
-            // 3. Fetch and Run the Python UI Logic
+            // 3. Import and Run the Python UI Logic
             status.textContent = "Loading Python UI Controller...";
-            const response = await fetch('../../src/pyodide_app/ui_controller.py');
-            const code = await response.text();
-            await pyodide.runPythonAsync(code);
+            await pyodide.runPythonAsync("from pyodide_app import ui_controller");
             
             document.getElementById('process-btn').disabled = false;
         }

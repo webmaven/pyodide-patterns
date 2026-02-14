@@ -1,4 +1,8 @@
+import sys
 from typing import Any, List
+
+# Environment detection
+IS_EMSCRIPTEN = sys.platform == "emscripten"
 
 # --- GC Management ---
 

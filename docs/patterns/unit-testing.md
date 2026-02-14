@@ -12,22 +12,32 @@ Python code intended for Pyodide often imports browser-specific modules like `js
 *   **Global Scope**: The `js` and `pyodide` modules are provided by the Pyodide runtime and are globally available in the browser.
 
 ## Solution
-Use **Module Mocking** to inject a "fake" `js` module into the Python module system before the application code is imported.
+Use **Guarded Platform Imports** to allow Python modules to be imported in standard CPython for testing.
 
-1.  **Mock Early**: Use `sys.modules["js"] = MagicMock()` at the very top of your test file or `conftest.py`.
-2.  **Verify Logic**: Call Python functions normally and assert results.
-3.  **Mock DOM Interactions**: If the Python code interacts with the DOM (e.g., `js.document`), use `unittest.mock.patch` to verify those side effects.
+1.  **Environment Detection**: Use `sys.platform == 'emscripten'` to detect if the code is running in Pyodide.
+2.  **Fallback Mocks**: If not in Emscripten, provide fallback mocks for `js` and `pyodide` modules.
+3.  **Clean Imports**: This allows tests to import the application code directly without manual `sys.modules` manipulation.
 
 ## Implementation
 
-### The Mocking Pattern
+### The Guarded Import Pattern
+In your application code:
 ```python
 import sys
-from unittest.mock import MagicMock
+IS_EMSCRIPTEN = sys.platform == "emscripten"
 
-# Inject the mock before importing the app
-sys.modules["js"] = MagicMock()
+if IS_EMSCRIPTEN:
+    import js
+    from pyodide.ffi import create_proxy
+else:
+    from unittest.mock import MagicMock
+    js = MagicMock()
+    def create_proxy(obj): return obj
+```
 
+### The Test File
+```python
+# No manual mocking required in the test itself
 from my_app.logic import calculate_total
 
 def test_calculate_total():

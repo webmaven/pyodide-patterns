@@ -1,8 +1,14 @@
-import js
 from typing import Any
-from .core import keep_alive, _GLOBAL_PROXIES
+from .core import IS_EMSCRIPTEN, keep_alive, _GLOBAL_PROXIES
 from .reactivity import Signal, observable
 from .vdom import h, PythonVDOM
+
+if IS_EMSCRIPTEN:
+    import js
+else:
+    # Provide a mock for CPython unit testing
+    from unittest.mock import MagicMock
+    js = MagicMock()
 
 __all__ = [
     "keep_alive",

@@ -1,7 +1,14 @@
-import js
 from typing import Any, Dict, List, Optional, Union
-from pyodide.ffi import create_proxy
-from .core import keep_alive
+from .core import IS_EMSCRIPTEN, keep_alive
+
+if IS_EMSCRIPTEN:
+    import js
+    from pyodide.ffi import create_proxy
+else:
+    from unittest.mock import MagicMock
+    js = MagicMock()
+    def create_proxy(obj: Any) -> Any:
+        return obj # Return original object in CPython for logic testing
 
 # --- Virtual DOM Engine ---
 

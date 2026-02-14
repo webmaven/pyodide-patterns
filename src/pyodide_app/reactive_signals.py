@@ -1,8 +1,16 @@
-import js
+import sys
 from typing import Any
 from pyodide_app.bridge.reactivity import Signal
-from pyodide_app.bridge.core import keep_alive
-from pyodide.ffi import create_proxy
+from pyodide_app.bridge.core import IS_EMSCRIPTEN, keep_alive
+
+if IS_EMSCRIPTEN:
+    import js
+    from pyodide.ffi import create_proxy
+else:
+    from unittest.mock import MagicMock
+    js = MagicMock()
+    def create_proxy(obj: Any) -> Any:
+        return obj
 
 # Core Signals
 count: Signal[int] = Signal(0)
