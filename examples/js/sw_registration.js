@@ -3,11 +3,10 @@
  * Ensures the page is Cross-Origin Isolated before Pyodide runs.
  */
 (function() {
-    // Calculate path to root SW
-    const depth = (window.location.pathname.match(/\//g) || []).length;
-    // For repo at /pyodide-patterns/, depth 1 is root, depth 2 is examples/
-    const isRoot = !window.location.pathname.includes('/examples/');
-    const swPath = isRoot ? './coop-coep-sw.js' : '../../coop-coep-sw.js';
+    // Dynamically calculate the path to the root service worker
+    // based on this script's own location in /examples/js/
+    const scriptUrl = new URL(document.currentScript.src);
+    const swPath = scriptUrl.href.replace(/examples\/js\/sw_registration\.js$/, 'coop-coep-sw.js');
 
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register(swPath).then(reg => {
@@ -22,6 +21,8 @@
                 url.searchParams.set('sw-fixed', 'true');
                 window.location.href = url.href;
             }
+        }).catch(err => {
+            console.error("Isolation Guard: Registration failed:", err);
         });
     }
 })();
