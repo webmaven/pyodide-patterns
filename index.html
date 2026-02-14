@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="examples/js/sw_registration.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pyodide Architecture Gallery</title>
@@ -251,16 +250,13 @@
 </footer>
 
 <script>
-    // Register the COOP/COEP Service Worker to enable SAB on GitHub Pages
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("coop-coep-sw.js").then(reg => {
-            console.log("Service Worker registered for COOP/COEP scope.");
-            reg.addEventListener("updatefound", () => {
-                if (navigator.serviceWorker.controller) {
-                    console.log("New SW version found, reloading...");
-                    window.location.reload();
-                }
-            });
+            // Only reload if the page isn't isolated yet and the SW has taken control
+            if (!window.crossOriginIsolated && navigator.serviceWorker.controller) {
+                console.log("Applying isolation headers via reload...");
+                window.location.reload();
+            }
         });
     }
 </script>
