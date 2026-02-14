@@ -1,6 +1,6 @@
-# Pyodide Patterns Index
+# Pyodide Architecture Index
 
-This directory contains narrative documentation for the patterns implemented in this cookbook. Unlike raw code examples, these patterns explain the **Forces** and **Trade-offs** involved in building production-ready Pyodide applications.
+This directory contains the narrative pattern language for the **Pyodide Architecture** project. Unlike raw code examples, these patterns explain the **Forces** and **Trade-offs** involved in building production-ready, browser-native Python applications.
 
 ## Table of Contents
 

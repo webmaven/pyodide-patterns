@@ -3,7 +3,7 @@
  * Synchronizes the local Python source files into the Pyodide virtual filesystem
  * to enable standard imports.
  */
-window.loadPyodideAndFiles = async (files = []) => {
+window.loadPyodideAndFiles = async (files = [], srcPrefix = '../../src/pyodide_app/') => {
     const pyodide = await loadPyodide();
     
     // Create package directory
@@ -16,19 +16,19 @@ window.loadPyodideAndFiles = async (files = []) => {
     
     const loadFile = async (url, dest) => {
         const resp = await fetch(url);
-        if (!resp.ok) throw new Error(`Failed to fetch ${url}`);
+        if (!resp.ok) throw new Error(`Failed to fetch ${url} from ${url}`);
         const text = await resp.text();
         pyodide.FS.writeFile(`pyodide_app/${dest}`, text);
     };
 
     // Always load the bridge module files
-    await loadFile('../../src/pyodide_app/bridge/__init__.py', 'bridge/__init__.py');
-    await loadFile('../../src/pyodide_app/bridge/core.py', 'bridge/core.py');
-    await loadFile('../../src/pyodide_app/bridge/reactivity.py', 'bridge/reactivity.py');
-    await loadFile('../../src/pyodide_app/bridge/vdom.py', 'bridge/vdom.py');
+    await loadFile(`${srcPrefix}bridge/__init__.py`, 'bridge/__init__.py');
+    await loadFile(`${srcPrefix}bridge/core.py`, 'bridge/core.py');
+    await loadFile(`${srcPrefix}bridge/reactivity.py`, 'bridge/reactivity.py');
+    await loadFile(`${srcPrefix}bridge/vdom.py`, 'bridge/vdom.py');
 
     for (const f of files) {
-        await loadFile(`../../src/pyodide_app/${f}`, f);
+        await loadFile(`${srcPrefix}${f}`, f);
     }
 
     return pyodide;

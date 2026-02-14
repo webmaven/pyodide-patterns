@@ -6,7 +6,7 @@ def test_greet_button_playwright(page: Page, http_server):
     A functional test using Playwright to verify that the greet button
     updates the heading with a personalized greeting.
     """
-    page.goto(f"{http_server}/index.html")
+    page.goto(f"{http_server}/examples/hello_world.html")
 
     # Find the elements
     title = page.locator("#title")

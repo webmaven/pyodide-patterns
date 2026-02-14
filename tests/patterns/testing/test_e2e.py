@@ -8,7 +8,7 @@ def test_greeting_e2e_playwright(page: Page, http_server):
     logs = []
     page.on("console", lambda msg: logs.append(msg.text))
 
-    page.goto(f"{http_server}/index.html")
+    page.goto(f"{http_server}/examples/hello_world.html")
 
     # Find the elements
     title = page.locator("#title")

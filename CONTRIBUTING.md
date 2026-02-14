@@ -1,6 +1,6 @@
-# Contributing to Pyodide Patterns Cookbook
+# Contributing to Pyodide Architecture
 
-We welcome contributions! This project is a curated collection of architectural wisdom for Pyodide developers.
+We welcome contributions! This project is a curated collection of engineering blueprints and architectural wisdom for browser-native Python developers.
 
 ## Engineering Standards
 

@@ -12,7 +12,7 @@ def test_pyodide_loads_successfully(page: Page, live_server: str):
     page.on("console", lambda msg: console_logs.append(msg.text))
     page.on("pageerror", lambda exc: console_logs.append(f"Page Error: {exc}"))
 
-    page.goto(f"{live_server}/index.html")
+    page.goto(f"{live_server}/examples/hello_world.html")
 
     # Wait for Pyodide to be attached to the window
     try:

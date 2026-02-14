@@ -1,12 +1,14 @@
-# Pyodide Patterns Cookbook
+# Pyodide Architecture: A Narrative Pattern Language
+
+*Engineering Blueprints for Browser-Native Python Applications*
 
 ![Tests](https://github.com/webmaven/pyodide-patterns/actions/workflows/test.yml/badge.svg)
 
-A comprehensive architectural reference and "Cookbook" for building production-ready, Python-native web applications.
-
 ## Overview
 
-This project goes beyond simple code snippets to provide a **Narrative Pattern Language** for Pyodide. Each pattern documents the **Forces** (trade-offs), the **Architectural Solution**, and the **Resulting Context** of specific implementations.
+This project is the definitive architectural reference for building production-ready, client-side Python applications. It goes beyond simple code snippets to provide a **Narrative Pattern Language** for the browser-native ecosystem. 
+
+Each pattern documents the **Forces** (competing constraints), the **Engineering Solution**, and the **Resulting Context** of specific implementations.
 
 The core philosophy is **Python-Centric Development**: providing the tools to build complex, reactive, and high-performance front-ends without leaving the Python ecosystem.
 

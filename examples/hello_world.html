@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello World Pattern</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js"></script>
+    <script src="js/pyodide_loader.js"></script>
+</head>
+<body>
+    <h1 id="title">Hello, Pyodide!</h1>
+    <input type="text" id="name" placeholder="Enter your name" />
+    <button id="greet-button">Greet</button>
+    <button id="benchmark-button">Benchmark</button>
+
+    <script>
+        async function init() {
+            // Use the unified loader with the correct path prefix
+            const pyodide = await loadPyodideAndFiles(['main.py', 'utils.py'], '../src/pyodide_app/');
+            window.pyodide = pyodide;
+            
+            // Import the logic from our modular package
+            await pyodide.runPythonAsync(`
+                from pyodide_app.main import run, greet, benchmark_add
+                run() # Sets initial "Hello, World!"
+
+                from js import document
+                from pyodide.ffi import create_proxy
+
+                def greet_wrapper(event):
+                    name = document.getElementById("name").value
+                    greet(name)
+
+                def benchmark_wrapper(event):
+                    benchmark_add()
+
+                document.getElementById("greet-button").onclick = create_proxy(greet_wrapper)
+                document.getElementById("benchmark-button").onclick = create_proxy(benchmark_wrapper)
+            `);
+        }
+        init().catch(console.error);
+    </script>
+</body>
+</html>

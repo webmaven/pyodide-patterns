@@ -123,13 +123,31 @@ def live_server(pyodide_version: str) -> Generator[str, None, None]:
         def __init__(self, *args, **kwargs):
             super().__init__(*args, directory=str(project_root), **kwargs)
 
+        def _get_modified_html(self, path):
+            full_path = project_root / path.lstrip("/")
+            if not full_path.exists() or not full_path.is_file():
+                return None
+            
+            content = full_path.read_text(encoding="utf-8")
+            if pattern.search(content):
+                return pattern.sub(new_url, content).encode("utf-8")
+            return content.encode("utf-8")
+
         def do_GET(self):  # noqa: N802
-            if self.path == "/index.html" or self.path == "/":
+            normalized_path = self.path.split("?")[0]
+            if normalized_path == "/" or normalized_path == "/index.html":
+                modified = self._get_modified_html("index.html")
+            elif normalized_path.endswith(".html"):
+                modified = self._get_modified_html(normalized_path)
+            else:
+                modified = None
+
+            if modified:
                 self.send_response(200)
                 self.send_header("Content-type", "text/html")
-                self.send_header("Content-Length", str(len(modified_content_bytes)))
+                self.send_header("Content-Length", str(len(modified)))
                 self.end_headers()
-                self.wfile.write(modified_content_bytes)
+                self.wfile.write(modified)
             else:
                 super().do_GET()
 

@@ -11,7 +11,7 @@ def test_benchmark_button(page: Page, http_server):
     logs = []
     page.on("console", lambda msg: logs.append(msg.text))
 
-    page.goto(f"{http_server}/index.html")
+    page.goto(f"{http_server}/examples/hello_world.html")
 
     # Wait for Pyodide to initialize
     expect(page.locator("#title")).to_have_text("Hello, World!", timeout=30000)
