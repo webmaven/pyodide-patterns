@@ -52,7 +52,10 @@
                 // 1. Setup the Worker Bridge (JS side)
                 status.textContent = "Setting up background worker...";
                 log("Spawning worker...");
-                const worker = new Worker('../js/comlink_worker.js');
+                
+                // Use absolute path for worker to avoid directory depth issues
+                const workerUrl = new URL('../js/comlink_worker.js', window.location.href).href;
+                const worker = new Worker(workerUrl);
                 
                 worker.onerror = (e) => {
                     console.error(`[${new Date().toISOString()}] FATAL Worker Error:`, e);
