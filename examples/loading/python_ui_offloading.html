@@ -40,36 +40,46 @@
 
     <script src="../js/pyodide_loader.js"></script>
     <script>
+        function log(msg) {
+            console.log(`[${new Date().toISOString()}] Demo: ${msg}`);
+        }
+
         async function init() {
             const status = document.getElementById('ui-status');
-            console.log("Demo: Initialization started.");
+            log("Initialization started.");
             
             try {
                 // 1. Setup the Worker Bridge (JS side)
                 status.textContent = "Setting up background worker...";
-                console.log("Demo: Spawning worker...");
+                log("Spawning worker...");
                 const worker = new Worker('../js/comlink_worker.js');
+                
+                worker.onerror = (e) => {
+                    console.error(`[${new Date().toISOString()}] FATAL Worker Error:`, e);
+                    status.textContent = "Worker Error: " + e.message;
+                };
+
                 window.worker_bridge = Comlink.wrap(worker);
                 
-                console.log("Demo: Initializing worker bridge...");
+                log("Initializing worker bridge (Awaiting worker.init)...");
                 await window.worker_bridge.init();
-                console.log("Demo: Worker bridge ready.");
+                log("Worker bridge ready.");
 
                 // 2. Setup the Main Thread Pyodide
                 status.textContent = "Bootstrapping main thread Python...";
-                console.log("Demo: Loading Pyodide and files...");
+                log("Loading main thread Pyodide and files...");
                 const pyodide = await loadPyodideAndFiles(['ui_controller.py']);
-                console.log("Demo: Main thread Pyodide ready.");
+                log("Main thread Pyodide ready.");
                 
                 // 3. Import and Run the Python UI Logic
                 status.textContent = "Loading Python UI Controller...";
-                console.log("Demo: Importing ui_controller...");
+                log("Importing ui_controller...");
                 await pyodide.runPythonAsync("from pyodide_app import ui_controller");
-                console.log("Demo: UI Controller loaded.");
+                log("UI Controller loaded.");
                 
                 document.getElementById('process-btn').disabled = false;
             } catch (err) {
-                console.error("Demo: Initialization failed:", err);
+                console.error(`[${new Date().toISOString()}] Demo: Initialization failed:`, err);
                 status.textContent = "Error: " + err.message;
             }
         }
