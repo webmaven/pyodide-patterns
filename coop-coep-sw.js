@@ -1,7 +1,6 @@
 /*
- * Universal COOP/COEP/CORP Service Worker
- * This version uses a Safe-Proxy pattern to ensure both local and CDN 
- * resources are compatible with a Cross-Origin Isolated environment.
+ * Robust COOP/COEP/CORP Service Worker
+ * Version: 2.0.0
  */
 
 self.addEventListener("install", () => self.skipWaiting());
@@ -13,8 +12,7 @@ self.addEventListener("fetch", (event) => {
     const url = new URL(event.request.url);
     const isSameOrigin = url.origin === self.location.origin;
 
-    // Use the original request for same-origin to avoid 'mode: navigate' errors.
-    // For cross-origin (CDNs), we use a new request with 'cors' mode to allow header injection.
+    // Use CORS for cross-origin to allow header injection
     const request = isSameOrigin ? event.request : new Request(event.request, {
         mode: "cors",
         credentials: "omit"
@@ -26,10 +24,10 @@ self.addEventListener("fetch", (event) => {
 
             const newHeaders = new Headers(response.headers);
             
-            // 1. Force the browser to allow this resource in an isolated context
+            // 1. Mandatory for COEP: CORP header
             newHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
 
-            // 2. If same-origin document, enforce isolation headers
+            // 2. Mandatory for Isolation: COOP/COEP on the document
             if (isSameOrigin && (
                 event.request.mode === "navigate" || 
                 response.headers.get("content-type")?.includes("text/html")
@@ -39,7 +37,12 @@ self.addEventListener("fetch", (event) => {
                 newHeaders.set("Cache-Control", "no-cache, no-store, must-revalidate");
             }
 
-            return new Response(response.body, {
+            // 3. Handle 304 and other no-body responses
+            const body = (response.status === 204 || response.status === 304) 
+                ? null 
+                : response.body;
+
+            return new Response(body, {
                 status: response.status,
                 statusText: response.statusText,
                 headers: newHeaders,

@@ -58,8 +58,14 @@
                 const worker = new Worker(workerUrl);
                 
                 worker.onerror = (e) => {
-                    console.error(`[${new Date().toISOString()}] FATAL Worker Error:`, e);
-                    status.textContent = "Worker Error: " + e.message;
+                    console.error(`[${new Date().toISOString()}] FATAL Worker Error:`, {
+                        message: e.message,
+                        filename: e.filename,
+                        lineno: e.lineno,
+                        colno: e.colno,
+                        error: e.error
+                    });
+                    status.textContent = "Worker Error: " + (e.message || "Thread died immediately (Check COEP/CORP)");
                 };
 
                 window.worker_bridge = Comlink.wrap(worker);
