@@ -3,8 +3,6 @@
  * Ensures the page is Cross-Origin Isolated before Pyodide runs.
  */
 (function() {
-    // Dynamically calculate the path to the root service worker
-    // based on this script's own location in /examples/js/
     const scriptUrl = new URL(document.currentScript.src);
     const swPath = scriptUrl.href.replace(/examples\/js\/sw_registration\.js$/, 'coop-coep-sw.js');
 
@@ -17,8 +15,10 @@
 
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register(swPath).then(reg => {
+            console.log("Isolation Guard: SW registered. Active:", !!reg.active, "Isolated:", window.crossOriginIsolated);
+            
             if (window.crossOriginIsolated) {
-                // Already isolated. Clean up the URL if needed.
+                // Already isolated. Clean up the URL.
                 if (window.location.search.includes('coi=true')) {
                     const url = new URL(window.location.href);
                     url.searchParams.delete('coi');
@@ -27,25 +27,24 @@
                 return;
             }
 
-            // If we aren't isolated, we need the SW to be active.
-            if (reg.active) {
-                // If it's active but we aren't isolated, and we haven't reloaded yet, do it now.
-                if (!window.location.search.includes('coi=true')) {
-                    reload();
-                }
-            } else {
-                // Wait for the new worker to become active.
-                reg.addEventListener("updatefound", () => {
-                    const newWorker = reg.installing;
-                    newWorker.addEventListener("statechange", () => {
-                        if (newWorker.state === "activated" && !window.crossOriginIsolated) {
-                            reload();
-                        }
-                    });
-                });
+            // Force reload if we have an active worker but no isolation
+            if (reg.active && !window.location.search.includes('coi=true')) {
+                reload();
             }
-        }).catch(err => {
-            console.error("Isolation Guard: Registration failed:", err);
+
+            // Handle new worker activation
+            reg.addEventListener("updatefound", () => {
+                const newWorker = reg.installing;
+                newWorker.addEventListener("statechange", () => {
+                    if (newWorker.state === "activated" && !window.crossOriginIsolated) {
+                        reload();
+                    }
+                });
+            });
+        });
+
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (!window.crossOriginIsolated) reload();
         });
     }
 })();

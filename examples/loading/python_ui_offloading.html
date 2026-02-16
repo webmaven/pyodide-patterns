@@ -93,7 +93,14 @@
             }
         }
 
-        init();
+        // Only start initialization if we are isolated.
+        // If not, the sw_registration.js will handle the reload.
+        if (window.crossOriginIsolated) {
+            init();
+        } else {
+            log("Waiting for Cross-Origin Isolation... (Check Service Worker)");
+            document.getElementById('ui-status').textContent = "Waiting for Isolation shield...";
+        }
     </script>
 </body>
 </html>
