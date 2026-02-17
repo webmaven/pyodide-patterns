@@ -1,13 +1,17 @@
 /**
  * Pyodide Architecture - Isolation Guard
- * Ensures the page is Cross-Origin Isolated before Pyodide runs.
+ * Version: 2.3.1 (Stable Isolation)
  */
 (function() {
+    const VERSION = "2.3.1";
     const scriptUrl = new URL(document.currentScript.src);
     const swPath = scriptUrl.href.replace(/examples\/js\/sw_registration\.js$/, 'coop-coep-sw.js');
 
+    console.log(`[${new Date().toISOString()}] Isolation Guard v${VERSION} starting...`);
+    console.log(`[${new Date().toISOString()}] Isolation Guard: Source: ${scriptUrl.href}`);
+
     function reload() {
-        console.log("Isolation Guard: Reloading to activate shield...");
+        console.log(`[${new Date().toISOString()}] Isolation Guard: Reloading to activate shield...`);
         const url = new URL(window.location.href);
         url.searchParams.set('coi', 'true');
         window.location.href = url.href;
@@ -15,14 +19,13 @@
 
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register(swPath).then(reg => {
-            console.log("Isolation Guard: SW status -", {
+            console.log(`[${new Date().toISOString()}] Isolation Guard: SW status -`, {
                 active: !!reg.active,
                 controlling: !!navigator.serviceWorker.controller,
                 isolated: window.crossOriginIsolated
             });
             
             if (window.crossOriginIsolated) {
-                // Already isolated. Clean up the URL.
                 if (window.location.search.includes('coi=true')) {
                     const url = new URL(window.location.href);
                     url.searchParams.delete('coi');
@@ -31,12 +34,10 @@
                 return;
             }
 
-            // Force reload if we have an active worker but no isolation
             if (reg.active && !window.location.search.includes('coi=true')) {
                 reload();
             }
 
-            // Handle new worker activation
             reg.addEventListener("updatefound", () => {
                 const newWorker = reg.installing;
                 newWorker.addEventListener("statechange", () => {

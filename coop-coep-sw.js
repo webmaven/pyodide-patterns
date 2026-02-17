@@ -1,10 +1,20 @@
 /*
  * Total Shield COOP/COEP/CORP Service Worker
- * Version: 2.3.0
+ * Version: 2.3.1 (Stable Isolation)
  */
 
-self.addEventListener("install", () => self.skipWaiting());
-self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
+const VERSION = "2.3.1";
+const log = (...args) => console.log(`[${new Date().toISOString()}] [SW v${VERSION}]`, ...args);
+
+self.addEventListener("install", () => {
+    log("Installing...");
+    self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+    log("Activating and claiming clients...");
+    event.waitUntil(self.clients.claim());
+});
 
 self.addEventListener("fetch", (event) => {
     if (event.request.method !== "GET") return;
@@ -15,17 +25,13 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
         fetch(event.request, isSameOrigin ? {} : { mode: "cors" })
             .then((response) => {
-                // If it's an opaque response (status 0), we can't do anything.
-                // But since we use mode: 'cors' for cross-origin, we shouldn't get status 0
-                // for CORS-supporting CDNs like jsdelivr.
                 if (!response || response.status === 0) return response;
 
                 const newHeaders = new Headers(response.headers);
                 
-                // MANDATORY: Every resource must have CORP in an isolated environment.
+                // Set isolation headers to ALL resources
                 newHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
 
-                // MANDATORY: Every document must have COOP/COEP.
                 if (isSameOrigin && (
                     event.request.mode === "navigate" || 
                     response.headers.get("content-type")?.includes("text/html")
@@ -35,7 +41,6 @@ self.addEventListener("fetch", (event) => {
                 }
 
                 // Handle 304/204 specially: they MUST NOT have a body.
-                // We create a new response with the injected headers.
                 const isNoBody = response.status === 204 || response.status === 304;
                 return new Response(isNoBody ? null : response.body, {
                     status: response.status,
