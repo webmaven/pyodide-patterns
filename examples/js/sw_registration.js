@@ -1,11 +1,12 @@
 /**
  * Pyodide Architecture - Isolation Guard
- * Version: 2.3.1 (Stable Isolation)
+ * Version: 2.3.3 (Stable Isolation)
  */
 (function() {
-    const VERSION = "2.3.1";
+    const VERSION = "2.3.3";
     const scriptUrl = new URL(document.currentScript.src);
-    const swPath = scriptUrl.href.replace(/examples\/js\/sw_registration\.js$/, 'coop-coep-sw.js');
+    // Add cache-busting to the SW registration itself
+    const swPath = scriptUrl.href.replace(/examples\/js\/sw_registration\.js$/, `coop-coep-sw.js?v=${Date.now()}`);
 
     console.log(`[${new Date().toISOString()}] Isolation Guard v${VERSION} starting...`);
     console.log(`[${new Date().toISOString()}] Isolation Guard: Source: ${scriptUrl.href}`);
