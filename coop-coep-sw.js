@@ -1,20 +1,13 @@
 /*
- * Total Shield COOP/COEP/CORP Service Worker
- * Version: 2.3.1 (Stable Isolation)
+ * Pass-Through Shield COOP/COEP/CORP Service Worker
+ * Version: 2.3.2 (Stable Isolation)
  */
 
-const VERSION = "2.3.1";
+const VERSION = "2.3.2";
 const log = (...args) => console.log(`[${new Date().toISOString()}] [SW v${VERSION}]`, ...args);
 
-self.addEventListener("install", () => {
-    log("Installing...");
-    self.skipWaiting();
-});
-
-self.addEventListener("activate", (event) => {
-    log("Activating and claiming clients...");
-    event.waitUntil(self.clients.claim());
-});
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
 self.addEventListener("fetch", (event) => {
     if (event.request.method !== "GET") return;
@@ -25,13 +18,17 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
         fetch(event.request, isSameOrigin ? {} : { mode: "cors" })
             .then((response) => {
-                if (!response || response.status === 0) return response;
+                // If it's a 304, we must return it as-is (browsers don't allow modifying 304s)
+                // but 304s will use the headers from the previously cached 200.
+                if (response.status === 304) return response;
 
+                // Create a new set of headers from the original
                 const newHeaders = new Headers(response.headers);
                 
-                // Set isolation headers to ALL resources
+                // MANDATORY: Every resource must have CORP in an isolated environment.
                 newHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
 
+                // MANDATORY: Documents must have COOP/COEP.
                 if (isSameOrigin && (
                     event.request.mode === "navigate" || 
                     response.headers.get("content-type")?.includes("text/html")
@@ -40,9 +37,9 @@ self.addEventListener("fetch", (event) => {
                     newHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
                 }
 
-                // Handle 304/204 specially: they MUST NOT have a body.
-                const isNoBody = response.status === 204 || response.status === 304;
-                return new Response(isNoBody ? null : response.body, {
+                // Return a new response with the injected headers
+                // We use the same status and body to ensure transparency
+                return new Response(response.body, {
                     status: response.status,
                     statusText: response.statusText,
                     headers: newHeaders,
