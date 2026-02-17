@@ -1,70 +1,62 @@
 /*
- * High-Visibility COOP/COEP Service Worker
- * Version: 2.1.0
+ * High-Stability COOP/COEP/CORP Service Worker
+ * Version: 2.2.0
  */
 
-const DEBUG = true;
-const log = (...args) => DEBUG && console.log("[SW]", ...args);
-
-self.addEventListener("install", () => {
-    log("Installing...");
-    self.skipWaiting();
-});
-
-self.addEventListener("activate", (event) => {
-    log("Activating and claiming clients...");
-    event.waitUntil(self.clients.claim());
-});
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
 self.addEventListener("fetch", (event) => {
+    if (event.request.method !== "GET") return;
+
     const url = new URL(event.request.url);
     const isSameOrigin = url.origin === self.location.origin;
 
-    // We only care about GET requests for isolation
-    if (event.request.method !== "GET") return;
-
-    // Skip non-interesting extensions
-    if (url.pathname.endsWith(".png") || url.pathname.endsWith(".ico")) return;
-
     event.respondWith(
-        fetch(isSameOrigin ? event.request : new Request(event.request, { mode: "cors" }))
+        fetch(event.request)
             .then((response) => {
-                if (!response) return response;
-                
-                // If it's a 304 or similar, we can't easily wrap it, but we should try
-                if (response.status === 0) {
-                    log("Opaque response encountered:", url.href);
+                // If the response is opaque (status 0), we CANNOT read or modify headers.
+                // In a COEP context, the browser will block this opaque response.
+                // We must re-fetch with mode: 'cors' to get a non-opaque response.
+                if (response.status === 0 && !isSameOrigin) {
+                    return fetch(new Request(event.request, { mode: "cors" }))
+                        .then(corsResp => {
+                            const newHeaders = new Headers(corsResp.headers);
+                            newHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
+                            return new Response(corsResp.body, {
+                                status: corsResp.status,
+                                statusText: corsResp.statusText,
+                                headers: newHeaders,
+                            });
+                        })
+                        .catch(() => response); // Fallback to original if CORS fails
+                }
+
+                // If it's a 304 (Not Modified) or 204 (No Content), return as-is.
+                // Re-wrapping these in 'new Response' can be problematic in some browsers.
+                if (response.status === 304 || response.status === 204) {
                     return response;
                 }
 
                 const newHeaders = new Headers(response.headers);
                 
-                // Set CORP to cross-origin for EVERYTHING to be safe
+                // Set CORP to cross-origin for all same-site resources too.
                 newHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
 
                 if (isSameOrigin && (
                     event.request.mode === "navigate" || 
-                    response.headers.get("content-type")?.includes("text/html")
+                    (response.headers.get("content-type") && response.headers.get("content-type").includes("text/html"))
                 )) {
-                    log("Injecting isolation headers for navigation:", url.pathname);
                     newHeaders.set("Cross-Origin-Embedder-Policy", "require-corp");
                     newHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
                 }
 
-                // Handle no-body responses (304, etc)
-                const body = (response.status === 204 || response.status === 304) 
-                    ? null 
-                    : response.body;
-
-                return new Response(body, {
+                return new Response(response.body, {
                     status: response.status,
                     statusText: response.statusText,
                     headers: newHeaders,
                 });
             })
-            .catch((err) => {
-                log("Fetch error for", url.href, err);
-                return fetch(event.request);
-            })
+            .catch(() => fetch(event.request))
     );
 });

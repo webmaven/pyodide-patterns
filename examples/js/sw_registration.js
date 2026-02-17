@@ -15,7 +15,11 @@
 
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register(swPath).then(reg => {
-            console.log("Isolation Guard: SW registered. Active:", !!reg.active, "Isolated:", window.crossOriginIsolated);
+            console.log("Isolation Guard: SW status -", {
+                active: !!reg.active,
+                controlling: !!navigator.serviceWorker.controller,
+                isolated: window.crossOriginIsolated
+            });
             
             if (window.crossOriginIsolated) {
                 // Already isolated. Clean up the URL.
