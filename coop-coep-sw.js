@@ -1,9 +1,9 @@
 /*
  * Global Shield COOP/COEP/CORP Service Worker
- * Version: 2.3.5 (Stable Isolation)
+ * Version: 2.3.6 (Stable Isolation)
  */
 
-const VERSION = "2.3.5";
+const VERSION = "2.3.6";
 const log = (...args) => console.log(`[${new Date().toISOString()}] [SW v${VERSION}]`, ...args);
 
 self.addEventListener("install", () => {
@@ -38,7 +38,6 @@ self.addEventListener("fetch", (event) => {
                     newHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
                 }
 
-                // If it's a 304/204, we MUST NOT send a body, but we MUST send headers.
                 const isNoBody = response.status === 204 || response.status === 304;
                 return new Response(isNoBody ? null : response.body, {
                     status: response.status,
