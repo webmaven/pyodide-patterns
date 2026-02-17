@@ -53,8 +53,9 @@
                 status.textContent = "Setting up background worker...";
                 log("Spawning worker...");
                 
-                // Use absolute path for worker to avoid directory depth issues
-                const workerUrl = new URL('../js/comlink_worker.js', window.location.href).href;
+                // Use absolute path with cache-buster for worker
+                const workerUrl = new URL(`../js/comlink_worker.js?v=${Date.now()}`, window.location.href).href;
+                log(`Spawning worker from: ${workerUrl}`);
                 const worker = new Worker(workerUrl);
                 
                 worker.onerror = (e) => {
