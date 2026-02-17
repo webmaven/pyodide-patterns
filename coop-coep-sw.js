@@ -1,9 +1,9 @@
 /*
- * Unbreakable Shield COOP/COEP/CORP Service Worker
- * Version: 2.3.4 (Stable Isolation)
+ * Global Shield COOP/COEP/CORP Service Worker
+ * Version: 2.3.5 (Stable Isolation)
  */
 
-const VERSION = "2.3.4";
+const VERSION = "2.3.5";
 const log = (...args) => console.log(`[${new Date().toISOString()}] [SW v${VERSION}]`, ...args);
 
 self.addEventListener("install", () => {
@@ -25,10 +25,8 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
         fetch(event.request, isSameOrigin ? {} : { mode: "cors" })
             .then((response) => {
-                // We no longer skip 304s. We MUST ensure the headers are present.
-                // However, creating a new Response with status 304 and a body is illegal.
-                // So we only re-wrap if it's not a 304, or we force the headers.
-                
+                if (!response || response.status === 0) return response;
+
                 const newHeaders = new Headers(response.headers);
                 newHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
 
@@ -40,21 +38,16 @@ self.addEventListener("fetch", (event) => {
                     newHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
                 }
 
-                if (response.status === 304 || response.status === 204) {
-                    // Browsers usually don't allow modifying 304 headers in the SW,
-                    // so we rely on the cache-buster in the request to avoid 304s 
-                    // for critical resources.
-                    return response;
-                }
-
-                return new Response(response.body, {
+                // If it's a 304/204, we MUST NOT send a body, but we MUST send headers.
+                const isNoBody = response.status === 204 || response.status === 304;
+                return new Response(isNoBody ? null : response.body, {
                     status: response.status,
                     statusText: response.statusText,
                     headers: newHeaders,
                 });
             })
             .catch((err) => {
-                console.error("SW Proxy Error:", url.href, err);
+                log("Fetch Error:", url.href, err);
                 return fetch(event.request);
             })
     );

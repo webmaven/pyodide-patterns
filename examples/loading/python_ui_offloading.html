@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="../js/sw_registration.js"></script>
+    <script src="../js/sw_registration.js?v=2.3.5"></script>
     <title>Python UI Offloading Pattern</title>
     <script src="https://cdn.jsdelivr.net/npm/comlink/dist/umd/comlink.js" crossorigin></script>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js" crossorigin></script>
@@ -48,6 +48,12 @@
             const status = document.getElementById('ui-status');
             log("Initialization started.");
             
+            // Wait 500ms for SW controller to settle if it just changed
+            if (!navigator.serviceWorker.controller) {
+                log("Waiting for Service Worker controller...");
+                await new Promise(r => setTimeout(r, 1000));
+            }
+
             try {
                 // 1. Setup the Worker Bridge (JS side)
                 status.textContent = "Setting up background worker...";
