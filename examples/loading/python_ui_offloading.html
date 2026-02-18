@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="../js/sw_registration.js?v=6.0.0"></script>
+    <script src="../js/sw_registration.js?v=6.0.1"></script>
     <title>Python UI Offloading Pattern</title>
     <!-- Atomic Bootstrapper -->
-    <script src="../js/atomic_bootstrap.js?v=6.0.0"></script>
+    <script src="../js/atomic_bootstrap.js?v=6.0.1"></script>
     <style>
         .spinner {
             display: none;
@@ -61,13 +61,17 @@
                 // ATOMIC SHIELD PATTERN:
                 // We provide the worker logic as a string. 
                 // spawnIsolatedWorker handles the dependency injection and Blob creation.
+                // Calculate vendor path for the internal worker fetch
+                const projectRoot = new URL('../../', window.location.href).href;
+                const vendorPath = projectRoot + 'examples/vendor/';
+
                 const workerLogic = `
                     (async function() {
                         try {
                             class PyodideWorker {
                                 async init() {
                                     this.pyodide = await loadPyodide({
-                                        indexURL: "./examples/vendor/"
+                                        indexURL: "${vendorPath}"
                                     });
                                 }
                                 async runPython(code) {

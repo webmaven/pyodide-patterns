@@ -1,9 +1,9 @@
 /*
  * Total Shield COOP/COEP/CORP Service Worker
- * Version: 6.0.0 (Atomic Shield)
+ * Version: 6.0.1 (Atomic Shield)
  */
 
-const VERSION = "6.0.0";
+const VERSION = "6.0.1";
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));

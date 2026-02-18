@@ -1,9 +1,9 @@
 /**
  * Pyodide Architecture - Isolation Guard
- * Version: 6.0.0 (Atomic Shield)
+ * Version: 6.0.1 (Atomic Shield)
  */
 (function() {
-    const VERSION = "6.0.0";
+    const VERSION = "6.0.1";
     const scriptUrl = new URL(document.currentScript.src);
     const projectRoot = scriptUrl.href.split('examples/js/sw_registration.js')[0];
     const swPath = `${projectRoot}coop-coep-sw.js?v=${VERSION}`;
