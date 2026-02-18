@@ -28,3 +28,4 @@ The only 100% stable solution identified is to **remove the network** from the w
 - **Decision:** Vendor all core JS dependencies to `/examples/vendor/`.
 - **Decision:** Use `window.waitForShield()` handshake before spawning any threads.
 - **Decision:** Mandatory use of `spawnIsolatedWorker` (Atomic Shield) for all multithreaded patterns.
+- **Decision:** Main thread must also load from `/examples/vendor/` to ensure the security context is consistent when spawning workers.
