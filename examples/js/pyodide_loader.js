@@ -1,19 +1,19 @@
 /**
  * Pyodide Loader Utility
+ * Version: 2.5.0 (Pure Origin)
  */
 
 // Calculate project root from this script's own URL
 const LOADER_URL = new URL(document.currentScript.src);
-const PROJECT_ROOT = LOADER_URL.href.replace(/examples\/js\/pyodide_loader\.js$/, '');
+const PROJECT_ROOT = LOADER_URL.href.split('examples/js/pyodide_loader.js')[0];
 
 window.loadPyodideAndFiles = async (files = []) => {
-    console.log(`Loader: Initializing from ${PROJECT_ROOT}`);
+    console.log(`[${new Date().toISOString()}] [Loader v2.5.0] Initializing from ${PROJECT_ROOT}`);
     
-    if (!window.crossOriginIsolated) {
-        console.error("CRITICAL: Page is NOT cross-origin isolated. This demo WILL fail. Please ensure the Service Worker is active.");
-    }
-    
-    const pyodide = await loadPyodide();
+    // We use the VENDORED local runtime to ensure total header control
+    const pyodide = await loadPyodide({
+        indexURL: `${PROJECT_ROOT}examples/vendor/`
+    });
     
     try { pyodide.FS.mkdir('pyodide_app'); } catch(e) {}
     pyodide.FS.writeFile('pyodide_app/__init__.py', '');
@@ -34,7 +34,6 @@ window.loadPyodideAndFiles = async (files = []) => {
     await loadFile(`${prefix}bridge/reactivity.py`, 'bridge/reactivity.py');
     await loadFile(`${prefix}bridge/vdom.py`, 'bridge/vdom.py');
 
-    // Load requested files
     for (const f of files) {
         await loadFile(`${prefix}${f}`, f);
     }

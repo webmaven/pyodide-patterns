@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="../js/sw_registration.js?v=2.3.6"></script>
+    <script src="../js/sw_registration.js?v=6.0.0"></script>
     <title>Python UI Offloading Pattern</title>
-    <script src="https://cdn.jsdelivr.net/npm/comlink/dist/umd/comlink.js" crossorigin></script>
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js" crossorigin></script>
+    <!-- Atomic Bootstrapper -->
+    <script src="../js/atomic_bootstrap.js?v=6.0.0"></script>
     <style>
         .spinner {
             display: none;
@@ -39,74 +39,77 @@
     </div>
 
     <script src="../js/pyodide_loader.js"></script>
+    
     <script>
         function log(msg) {
-            console.log(`[${new Date().toISOString()}] Demo: ${msg}`);
+            console.log(`[${new Date().toISOString()}] [Demo v6.0.0] ${msg}`);
         }
 
         async function init() {
             const status = document.getElementById('ui-status');
             log("Initialization started.");
             
-            // Wait 500ms for SW controller to settle if it just changed
-            if (!navigator.serviceWorker.controller) {
-                log("Waiting for Service Worker controller...");
-                await new Promise(r => setTimeout(r, 1000));
+            status.textContent = "Verifying isolation shield...";
+            if (!(await window.waitForShield())) {
+                status.textContent = "Shield failed to activate. Please refresh.";
+                return;
             }
 
             try {
-                // 1. Setup the Worker Bridge (JS side)
-                status.textContent = "Setting up background worker...";
-                log("Spawning worker...");
+                status.textContent = "Setting up atomic background worker...";
                 
-                // Use absolute path with cache-buster for worker
-                const workerUrl = new URL(`../js/comlink_worker.js?v=${Date.now()}`, window.location.href).href;
-                log(`Spawning worker from: ${workerUrl}`);
-                const worker = new Worker(workerUrl);
+                // ATOMIC SHIELD PATTERN:
+                // We provide the worker logic as a string. 
+                // spawnIsolatedWorker handles the dependency injection and Blob creation.
+                const workerLogic = `
+                    (async function() {
+                        try {
+                            class PyodideWorker {
+                                async init() {
+                                    this.pyodide = await loadPyodide({
+                                        indexURL: "./examples/vendor/"
+                                    });
+                                }
+                                async runPython(code) {
+                                    return await this.pyodide.runPythonAsync(code);
+                                }
+                            }
+                            Comlink.expose(new PyodideWorker());
+                        } catch (e) {
+                            self.postMessage({ type: 'error', message: e.message });
+                        }
+                    })();
+                `;
+
+                log("Spawning atomic worker...");
+                const worker = await window.spawnIsolatedWorker(workerLogic);
                 
                 worker.onerror = (e) => {
-                    console.error(`[${new Date().toISOString()}] FATAL Worker Error:`, {
-                        message: e.message,
-                        filename: e.filename,
-                        lineno: e.lineno,
-                        colno: e.colno,
-                        error: e.error
-                    });
-                    status.textContent = "Worker Error: " + (e.message || "Thread died immediately (Check COEP/CORP)");
+                    console.error("FATAL Worker Error:", e);
+                    status.textContent = "Worker Error: Thread died (Check COEP/CORP)";
                 };
 
                 window.worker_bridge = Comlink.wrap(worker);
-                
-                log("Initializing worker bridge (Awaiting worker.init)...");
                 await window.worker_bridge.init();
                 log("Worker bridge ready.");
 
                 // 2. Setup the Main Thread Pyodide
                 status.textContent = "Bootstrapping main thread Python...";
-                log("Loading main thread Pyodide and files...");
                 const pyodide = await loadPyodideAndFiles(['ui_controller.py']);
                 log("Main thread Pyodide ready.");
                 
                 // 3. Import and Run the Python UI Logic
                 status.textContent = "Loading Python UI Controller...";
-                log("Importing ui_controller...");
                 await pyodide.runPythonAsync("from pyodide_app import ui_controller");
                 log("UI Controller loaded.");
                 
                 document.getElementById('process-btn').disabled = false;
             } catch (err) {
-                console.error(`[${new Date().toISOString()}] Demo: Initialization failed:`, err);
+                console.error("Demo Error:", err);
                 status.textContent = "Error: " + err.message;
             }
         }
 
-        log(`Initial Check - Isolated: ${window.crossOriginIsolated}, SW: ${!!navigator.serviceWorker.controller}`);
-        
-        // Always try to initialize, but warn if not isolated
-        if (!window.crossOriginIsolated) {
-            log("WARNING: Page is NOT isolated. Worker might fail if it loads from CDN.");
-        }
-        
         init();
     </script>
 </body>

@@ -1,20 +1,12 @@
 /*
- * Global Shield COOP/COEP/CORP Service Worker
- * Version: 2.3.6 (Stable Isolation)
+ * Total Shield COOP/COEP/CORP Service Worker
+ * Version: 6.0.0 (Atomic Shield)
  */
 
-const VERSION = "2.3.6";
-const log = (...args) => console.log(`[${new Date().toISOString()}] [SW v${VERSION}]`, ...args);
+const VERSION = "6.0.0";
 
-self.addEventListener("install", () => {
-    log("Installing...");
-    self.skipWaiting();
-});
-
-self.addEventListener("activate", (event) => {
-    log("Activating and claiming clients...");
-    event.waitUntil(self.clients.claim());
-});
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
 self.addEventListener("fetch", (event) => {
     if (event.request.method !== "GET") return;
@@ -22,32 +14,34 @@ self.addEventListener("fetch", (event) => {
     const url = new URL(event.request.url);
     const isSameOrigin = url.origin === self.location.origin;
 
+    if (url.pathname.endsWith("/__ping__")) {
+        event.respondWith(new Response("pong", { headers: { "Content-Type": "text/plain" } }));
+        return;
+    }
+
+    if (!isSameOrigin) return;
+
     event.respondWith(
-        fetch(event.request, isSameOrigin ? {} : { mode: "cors" })
-            .then((response) => {
-                if (!response || response.status === 0) return response;
+        fetch(event.request).then((response) => {
+            if (response.status === 0 || response.status === 304) return response;
 
-                const newHeaders = new Headers(response.headers);
-                newHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
+            const newHeaders = new Headers(response.headers);
+            newHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
 
-                if (isSameOrigin && (
-                    event.request.mode === "navigate" || 
-                    response.headers.get("content-type")?.includes("text/html")
-                )) {
-                    newHeaders.set("Cross-Origin-Embedder-Policy", "require-corp");
-                    newHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
-                }
+            if (event.request.mode === "navigate" || response.headers.get("content-type")?.includes("text/html")) {
+                newHeaders.set("Cross-Origin-Embedder-Policy", "require-corp");
+                newHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
+            }
 
-                const isNoBody = response.status === 204 || response.status === 304;
-                return new Response(isNoBody ? null : response.body, {
-                    status: response.status,
-                    statusText: response.statusText,
-                    headers: newHeaders,
-                });
-            })
-            .catch((err) => {
-                log("Fetch Error:", url.href, err);
-                return fetch(event.request);
-            })
+            // Stream-safe re-wrapping
+            const { readable, writable } = new TransformStream();
+            response.body.pipeTo(writable);
+
+            return new Response(readable, {
+                status: response.status,
+                statusText: response.statusText,
+                headers: newHeaders,
+            });
+        }).catch(() => fetch(event.request))
     );
 });

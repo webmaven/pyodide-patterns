@@ -1,36 +1,43 @@
 /**
  * Pyodide Architecture - Isolation Guard
- * Version: 2.3.6 (Stable Isolation)
+ * Version: 6.0.0 (Atomic Shield)
  */
 (function() {
-    const VERSION = "2.3.6";
+    const VERSION = "6.0.0";
     const scriptUrl = new URL(document.currentScript.src);
-    
-    // Robustly find project root by splitting at the known script path
     const projectRoot = scriptUrl.href.split('examples/js/sw_registration.js')[0];
-    const swPath = `${projectRoot}coop-coep-sw.js?v=${Date.now()}`;
+    const swPath = `${projectRoot}coop-coep-sw.js?v=${VERSION}`;
 
     console.log(`[${new Date().toISOString()}] [ISO Guard v${VERSION}] Starting...`);
-    console.log(`[${new Date().toISOString()}] [ISO Guard v${VERSION}] Project Root: ${projectRoot}`);
+
+    window.waitForShield = async () => {
+        if (!navigator.serviceWorker) return false;
+        const pingUrl = `${projectRoot}__ping__`;
+        for (let i = 0; i < 20; i++) {
+            try {
+                const resp = await fetch(pingUrl);
+                if (resp.ok && (await resp.text()) === "pong") return true;
+            } catch (e) {}
+            await new Promise(r => setTimeout(r, 250));
+        }
+        return false;
+    };
 
     function reload() {
-        console.log(`[${new Date().toISOString()}] [ISO Guard v${VERSION}] Reloading to activate shield...`);
         const url = new URL(window.location.href);
         url.searchParams.set('coi', 'true');
         window.location.href = url.href;
     }
 
     if ("serviceWorker" in navigator) {
-        // Register with explicit scope to ensure it covers the entire project
         navigator.serviceWorker.register(swPath, { scope: projectRoot }).then(reg => {
             console.log(`[${new Date().toISOString()}] [ISO Guard v${VERSION}] SW status:`, {
                 active: !!reg.active,
                 controlling: !!navigator.serviceWorker.controller,
-                isolated: window.crossOriginIsolated,
-                scope: reg.scope
+                isolated: window.crossOriginIsolated
             });
             
-            if (window.crossOriginIsolated) {
+            if (window.crossOriginIsolated && navigator.serviceWorker.controller) {
                 if (window.location.search.includes('coi=true')) {
                     const url = new URL(window.location.href);
                     url.searchParams.delete('coi');
@@ -39,21 +46,14 @@
                 return;
             }
 
-            // If SW is active but we aren't isolated, we need a refresh
-            if (reg.active && !window.location.search.includes('coi=true')) {
-                reload();
-            }
-
+            if (reg.active && !window.location.search.includes('coi=true')) reload();
+            
             reg.addEventListener("updatefound", () => {
                 const newWorker = reg.installing;
                 newWorker.addEventListener("statechange", () => {
-                    if (newWorker.state === "activated" && !window.crossOriginIsolated) {
-                        reload();
-                    }
+                    if (newWorker.state === "activated" && !window.crossOriginIsolated) reload();
                 });
             });
-        }).catch(err => {
-            console.error(`[${new Date().toISOString()}] [ISO Guard v${VERSION}] Registration failed:`, err);
         });
     }
 })();

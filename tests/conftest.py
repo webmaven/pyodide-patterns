@@ -91,6 +91,39 @@ class NoCorsHandler(http.server.SimpleHTTPRequestHandler):
     pass
 
 
+class GitHubPagesHandler(http.server.SimpleHTTPRequestHandler):
+    """
+    Handler that strictly mimics GitHub Pages:
+    - No CORS headers.
+    - No COOP/COEP headers.
+    - Correct MIME types.
+    """
+
+    def end_headers(self):
+        # Explicitly do NOT send any extra headers.
+        return super().end_headers()
+
+
+@pytest.fixture(scope="session")
+def github_pages_simulator() -> Generator[str, None, None]:
+    """
+    Starts a server that behaves exactly like GitHub Pages to catch
+    isolation and header-related failures locally.
+    """
+    project_root = Path(__file__).parent.parent
+    handler = partial(GitHubPagesHandler, directory=str(project_root))
+
+    with socketserver.TCPServer(("localhost", 0), handler) as httpd:
+        host, port = cast(tuple[str, int], httpd.server_address)
+        base_url = f"http://{host}:{port}"
+        server_thread = threading.Thread(target=httpd.serve_forever)
+        server_thread.daemon = True
+        server_thread.start()
+        yield base_url
+        httpd.shutdown()
+        server_thread.join()
+
+
 @pytest.fixture(scope="session")
 def live_server(pyodide_version: str) -> Generator[str, None, None]:
     """

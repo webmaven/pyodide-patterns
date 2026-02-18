@@ -1,30 +1,34 @@
 /**
  * Pyodide Comlink Worker
+ * Version: 2.5.0 (Pure Origin)
  */
 (function() {
+    const VERSION = "2.5.0";
+    const log = (...args) => console.log(`[${new Date().toISOString()}] [Worker v${VERSION}]`, ...args);
+
     try {
-        console.log(`[${new Date().toISOString()}] Worker: Starting script load...`);
+        log("Starting script load...");
         
-        // Wrap everything in a closure to catch early errors
-        importScripts("https://cdn.jsdelivr.net/npm/comlink/dist/umd/comlink.js");
-        importScripts("https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js");
+        // Use vendored same-origin scripts
+        importScripts("../vendor/comlink.js");
+        importScripts("../vendor/pyodide.js");
         
-        console.log(`[${new Date().toISOString()}] Worker: Scripts imported.`);
+        log("Scripts imported.");
 
         class PyodideWorker {
             async init() {
-                console.log(`[${new Date().toISOString()}] Worker: init() called.`);
+                log("init() called.");
                 try {
+                    // Use vendored same-origin runtime
                     this.pyodide = await loadPyodide({
-                        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.28.0/full/"
+                        indexURL: "../vendor/"
                     });
-                    console.log(`[${new Date().toISOString()}] Worker: loadPyodide() complete.`);
+                    log("loadPyodide() complete.");
                     
-                    await this.pyodide.loadPackage("micropip");
-                    this.micropip = this.pyodide.pyimport("micropip");
-                    console.log(`[${new Date().toISOString()}] Worker: Micropip ready.`);
+                    // We don't load micropip by default to keep it lightweight
+                    // unless specifically needed by a demo.
                 } catch (err) {
-                    console.error(`[${new Date().toISOString()}] Worker: init() failed:`, err);
+                    console.error(`[Worker v${VERSION}] init() failed:`, err);
                     throw err;
                 }
             }
@@ -35,11 +39,10 @@
         }
 
         Comlink.expose(new PyodideWorker());
-        console.log(`[${new Date().toISOString()}] Worker: Comlink exposed.`);
+        log("Comlink exposed.");
 
     } catch (e) {
-        console.error(`[${new Date().toISOString()}] FATAL Error in worker script:`, e);
-        // Attempt to send the error back to the main thread
-        self.postMessage({ type: 'error', message: e.message, stack: e.stack });
+        console.error(`[Worker v${VERSION}] FATAL Error:`, e);
+        self.postMessage({ type: 'error', message: e.message });
     }
 })();

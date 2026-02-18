@@ -2,36 +2,72 @@ import pytest
 import time
 from playwright.sync_api import Page, expect
 
-# The target for our systematic investigation
-BASE_URL = "https://webmaven.github.io/pyodide-patterns/"
-
-def test_behavioral_offloading(page: Page):
-    full_url = f"{BASE_URL}examples/loading/python_ui_offloading.html"
-    print(f"\nSTART BEHAVIORAL TEST: {full_url}")
-
-    logs = []
-    page.on("console", lambda msg: logs.append(f"[{msg.type}] {msg.text}"))
-    page.on("pageerror", lambda exc: logs.append(f"[ERROR] {exc}"))
-
-    page.goto(full_url)
+# We use the simulator to catch header-related issues locally
+@pytest.mark.parametrize("demo_path", [
+    "examples/loading/python_ui_offloading.html",
+    "examples/workers/worker_pool.html",
+    "examples/loading/shared_memory_gpu.html"
+])
+def test_isolation_lifecycle_lab(page: Page, github_pages_simulator: str, demo_path: str):
+    """
+    SYSTEMATIC PROBE: Validates the isolation lifecycle.
+    1. First Visit (Cold Start): Should trigger Guard reload and achieve isolation.
+    2. Soft Reload: Should maintain isolation.
+    3. Navigation from Root: Should maintain isolation.
+    """
+    base_url = github_pages_simulator
+    url = f"{base_url}/{demo_path}"
     
-    # 1. Wait for Ready
-    status = page.locator("#ui-status")
-    expect(status).to_have_text("Python UI Controller Ready.", timeout=30000)
-    print("    Page is Ready.")
-
-    # 2. Click Button
-    btn = page.locator("#process-btn")
-    btn.click()
-    print("    Button Clicked.")
-
-    # 3. Wait for result (expected after 3s sleep in worker)
-    output = page.locator("#ui-output")
+    print(f"\n[LAB] Testing Demo: {demo_path}")
+    
+    # --- STEP 1: Cold Start (Direct Visit) ---
+    print("  [1] Cold Start (Direct Visit)...")
+    page.goto(url)
+    
+    # Wait for the Isolation Guard to do its work (might involve a reload)
+    # We wait until crossOriginIsolated is True
     try:
-        expect(output).to_have_text("The answer is 84", timeout=15000)
-        print("    SUCCESS: Result received.")
-    except Exception as e:
-        print(f"    FAILURE: Result not received. Timeout reached.")
-        print("    CONSOLE LOGS:")
-        for l in logs: print(f"      {l}")
-        raise e
+        page.wait_for_function("() => window.crossOriginIsolated === true", timeout=15000)
+        print("    ✅ Shield Established (Isolated: True)")
+    except Exception:
+        # If it failed, let's see why
+        metrics = page.evaluate("""() => {
+            return {
+                isolated: window.crossOriginIsolated,
+                sw_active: !!navigator.serviceWorker.controller,
+                ua: navigator.userAgent
+            }
+        }""")
+        pytest.fail(f"Cold Start failed to isolate. Metrics: {metrics}")
+
+    # --- STEP 2: Soft Reload ---
+    print("  [2] Soft Reload...")
+    page.reload()
+    page.wait_for_load_state("networkidle")
+    
+    # Check if isolation survived the reload
+    is_isolated = page.evaluate("() => window.crossOriginIsolated")
+    assert is_isolated, "Isolation lost after Soft Reload!"
+    print("    ✅ Shield Persistent after Soft Reload")
+
+    # --- STEP 3: Functional Verification ---
+    # We verify the demo actually initializes its Pyodide component
+    print("  [3] Verifying Pyodide Initialization...")
+    
+    if "python_ui_offloading" in demo_path:
+        # Wait for the status to show 'Ready'
+        status = page.locator("#ui-status")
+        expect(status).to_contain_text("Ready", timeout=30000)
+        print("    ✅ UI Controller initialized successfully")
+        
+        # Test a functional interaction
+        page.click("#process-btn")
+        expect(page.locator("#ui-output")).to_contain_text("The answer is 84", timeout=10000)
+        print("    ✅ Logic Execution successful")
+
+    elif "worker_pool" in demo_path:
+        status = page.locator("#status")
+        expect(status).to_contain_text("Pool Ready", timeout=30000)
+        print("    ✅ Worker Pool initialized successfully")
+
+    print(f"  [DONE] Demo {demo_path} passed the Stability Matrix.")
