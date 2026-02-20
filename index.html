@@ -38,6 +38,15 @@
         .badge-loading { background: #e8f5e9; color: #1b5e20; }
         .badge-iso { background: #fff3e0; color: #e65100; border: 1px solid #ffccbc; }
 
+        /* Selection Matrix Styles */
+        .matrix-container { overflow-x: auto; margin-bottom: 60px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #ddd; }
+        .matrix-table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+        .matrix-table th { text-align: left; background: #f8f9fa; padding: 12px; border-bottom: 2px solid var(--primary); color: var(--primary); }
+        .matrix-table td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: top; }
+        .matrix-table tr:hover { background: #fdfdfd; }
+        .matrix-table .feat { font-weight: bold; color: var(--accent); }
+        .matrix-table .req { font-family: monospace; font-size: 0.9em; background: #eee; padding: 2px 4px; border-radius: 3px; }
+
         footer { text-align: center; padding: 40px; color: #999; font-size: 0.8em; }
     </style>
 </head>
@@ -56,6 +65,59 @@
 
 <div class="container">
     
+    <div class="matrix-container">
+        <h2 style="margin-top: 0; font-size: 1.2em; color: var(--primary);">Architectural Selection Matrix</h2>
+        <p style="font-size: 0.9em; color: #666; margin-bottom: 20px;">Use this guide to map your technical constraints to the proven blueprints below.</p>
+        <table class="matrix-table">
+            <thead>
+                <tr>
+                    <th>Engineer Need</th>
+                    <th>Recommended Pattern</th>
+                    <th>Complexity</th>
+                    <th>Technical Requirement</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="feat">Zero-Latency Interaction</td>
+                    <td>Reactive UI (Signals)</td>
+                    <td>Medium</td>
+                    <td><span class="req">src/bridge/reactivity.py</span></td>
+                </tr>
+                <tr>
+                    <td class="feat">CPU-Bound Computation</td>
+                    <td>Atomic Worker Shield + Pool</td>
+                    <td>High</td>
+                    <td><span class="req">COOP/COEP Headers</span> + <span class="req">SAB</span></td>
+                </tr>
+                <tr>
+                    <td class="feat">Cold-Start Optimization</td>
+                    <td>Bootstrapping & SW Caching</td>
+                    <td>Low</td>
+                    <td><span class="req">Service Worker</span></td>
+                </tr>
+                <tr>
+                    <td class="feat">Linear UI Control Flow</td>
+                    <td>UI Offloading (Sync-Async)</td>
+                    <td>Medium</td>
+                    <td><span class="req">Web Worker</span> + <span class="req">Comlink</span></td>
+                </tr>
+                <tr>
+                    <td class="feat">Standard File I/O</td>
+                    <td>Persistent FS (IDBFS)</td>
+                    <td>Low</td>
+                    <td><span class="req">IndexedDB</span></td>
+                </tr>
+                <tr>
+                    <td class="feat">Observability & QA</td>
+                    <td>E2E Testing + Log Capture</td>
+                    <td>Medium</td>
+                    <td><span class="req">Playwright</span> + <span class="req">Console Bridge</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
     <h2 class="section-title">Architectural & UI Patterns</h2>
     <div class="grid">
         <div class="card">
@@ -171,6 +233,7 @@
             <p>Deep dive into COOP/COEP headers and the requirements for SAB and threads.</p>
             <div class="links">
                 <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/cross-origin-isolation.md">Docs</a>
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/snippets/sw-isolation.js">Snippet</a>
             </div>
         </div>
         <div class="card">
@@ -206,6 +269,7 @@
             <div class="links">
                 <a href="examples/loading/python_ui_offloading.html">Live Demo</a>
                 <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/patterns/atomic-worker-shield.md">Docs</a>
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/snippets/atomic-shield.js">Snippet</a>
             </div>
         </div>
     </div>
@@ -259,10 +323,23 @@
         </div>
     </div>
 
+    <h2 class="section-title">Integration Recipes</h2>
+    <div class="grid">
+        <div class="card">
+            <span class="badge badge-iso">Frameworks</span>
+            <h3>React + Multithreading</h3>
+            <p>Using the Atomic Worker Shield and hooks within a modern React application.</p>
+            <div class="links">
+                <a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/integration/react-multithreading.md">Recipe Docs</a>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <footer>
-    &copy; 2026 Pyodide Architecture Project | Engineering Blueprints for the Browser
+    <p>&copy; 2026 Pyodide Architecture Project | Engineering Blueprints for the Browser</p>
+    <p><a href="https://github.com/webmaven/pyodide-patterns/blob/main/docs/research/production_checklist.md" style="color: var(--accent); text-decoration: none; font-weight: bold;">Production Readiness Checklist &rarr;</a></p>
 </footer>
 
 <script>
